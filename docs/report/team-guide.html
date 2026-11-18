@@ -75,8 +75,8 @@
   <tr><td>Server</td><td>One Java program. It listens on <b>TCP port 8080</b> (web pages, WebSocket, Java clients) and <b>UDP port 8888</b> (discovery)</td><td><code>src/arena/server/*</code></td></tr>
   <tr><td>Game logic</td><td>Rules of both modes and the AI bot</td><td><code>src/arena/game/Board.java</code>, <code>AiPlayer.java</code></td></tr>
   <tr><td>Shared crypto</td><td>Diffie-Hellman, SHA-256, HMAC, signed envelopes, mini JSON</td><td><code>src/arena/common/*</code></td></tr>
-  <tr><td>Web game</td><td>What players see</td><td><code>web/index.html</code>, <code>css/game.css</code>, <code>js/game.js</code></td></tr>
-  <tr><td>Control Room</td><td>What evaluators see</td><td><code>web/control.html</code>, <code>js/control.js</code></td></tr>
+  <tr><td>Web game</td><td>What players see</td><td><code>web/index.html</code>, <code>css/game.css</code>, <code>js/game/*.js</code></td></tr>
+  <tr><td>Control Room</td><td>What evaluators see</td><td><code>web/control.html</code>, <code>css/control.css</code>, <code>js/control.js</code></td></tr>
   <tr><td>Browser networking</td><td>Secure WebSocket used by both pages</td><td><code>web/js/net.js</code></td></tr>
   <tr><td>Java clients</td><td>Terminal player, 300-bot load tester, UDP scanner</td><td><code>src/arena/client/*</code></td></tr>
 </table>
@@ -85,7 +85,7 @@
 <p>What happens when a player clicks a cell. Every member's concept appears somewhere in this chain, so it is the best way to explain how the parts fit together.</p>
 <table class="flow">
   <tr><th>#</th><th>Step</th><th style="width:22%">Where</th><th style="width:12%">Member</th></tr>
-  <tr><td>1</td><td>Player clicks a glowing cell. The click handler sends <code>{t:"move", cell:40}</code></td><td><code>game.js → cell()</code></td><td>—</td></tr>
+  <tr><td>1</td><td>Player clicks a glowing cell. The click handler sends <code>{t:"move", cell:40}</code></td><td><code>js/game/board.js → cell()</code></td><td>—</td></tr>
   <tr><td>2</td><td>net.js adds a sequence number (<code>seq</code>), computes <code>HMAC-SHA256(key, json)</code>, puts the 64-hex MAC in front, and sends it as a WebSocket frame</td><td><code>net.js → send()</code></td><td>E</td></tr>
   <tr><td>3</td><td>The bytes travel over the existing <b>TCP</b> connection inside a <b>WebSocket</b> frame (masked by the browser)</td><td>network</td><td>B</td></tr>
   <tr><td>4</td><td>On the server, the <b>Selector</b> wakes up: the client's channel is <code>OP_READ</code>-ready</td><td><code>Reactor.run() → dispatch()</code></td><td>A</td></tr>
@@ -96,7 +96,7 @@
   <tr><td>9</td><td>The board is updated, and the new state is <b>signed and sent to every player and spectator</b></td><td><code>Room.apply()</code> → <code>broadcast()</code> → <code>Connection.sendSecure()</code></td><td>A + E</td></tr>
   <tr><td>10</td><td>If it's now the bot's turn, the AI is submitted to the <b>thread pool</b> as a <code>Callable</code>. The selector does <i>not</i> wait</td><td><code>Room.scheduleBot()</code> → <code>Reactor.submit()</code></td><td>C</td></tr>
   <tr><td>11</td><td>When the worker finishes, its <code>Future</code> is done → <code>selector.wakeup()</code> → the selector applies the bot's move (back to step 9)</td><td><code>Reactor.completeJobs()</code></td><td>C</td></tr>
-  <tr><td>12</td><td>Each browser verifies the server's MAC and seq, then redraws the board</td><td><code>net.js → onmessage</code>, <code>game.js → onRoom()</code></td><td>E</td></tr>
+  <tr><td>12</td><td>Each browser verifies the server's MAC and seq, then redraws the board</td><td><code>net.js → onmessage</code>, <code>js/game/main.js → onRoom()</code></td><td>E</td></tr>
 </table>
 <p><b>Before any of this,</b> the player found the server: a browser uses the URL (or a friend's invite link or QR code, Member B), and the Java terminal client finds the server by <b>UDP broadcast</b> (Member D). Then a <b>Diffie-Hellman handshake</b> created the secret key used in steps 2, 7 and 12 (Member E).</p>
 
@@ -338,7 +338,7 @@ SocketAddress from = ch.receive(buf);                   <span class="c">// null 
 
 <!-- ======================================================================= MEMBER E -->
 <h2 class="member newpage">Member E — Secure network programming</h2>
-<p><b>Lecture:</b> Secure Network Programming. <b>Your files:</b> <code>common/Crypto.java</code>, <code>common/SecureLink.java</code>, <code>web/js/net.js</code>, <code>Lobby.onHello()</code> / <code>adminLogin()</code>, <code>Connection.onText()</code> and <code>TokenBucket</code>, the Security lab in <code>control.js</code>.</p>
+<p><b>Lecture:</b> Secure Network Programming. <b>Your files:</b> <code>common/Crypto.java</code>, <code>common/SecureLink.java</code>, <code>web/js/net.js</code>, <code>server/SecureHandshake.java</code>, <code>server/AdminConsole.java</code>, <code>Connection.onText()</code> and <code>TokenBucket</code>, the Security lab in <code>control.js</code>.</p>
 
 <h3>E.1 The concept in simple words</h3>
 <p>Players connect over plain <code>http://</code>, often on public Wi-Fi, which is the exact threat from the lecture activity (fake Wi-Fi, eavesdropping, MITM, mark tampering 65 → 85, replayed requests, DoS). We protect the connection in layers:</p>
@@ -366,7 +366,7 @@ open(): recompute the HMAC → mismatch?  → <span class="k">TAMPER</span>   (c
 <h4>3. Authentication</h4>
 <ul>
   <li><b>Players:</b> the server gives each session a random 256-bit token, sent encrypted (XOR with <code>SHA-256(K‖"token")</code>). After a refresh or Wi-Fi drop, the browser proves ownership with <code>HMAC(token, newDhPublicKey)</code>. The token itself never travels, and the proof can't be reused.</li>
-  <li><b>Admin (Control Room):</b> <b>challenge-response</b>. Each connection gets a random <code>nonce</code>, and the browser sends <code>HMAC(SHA-256(password), nonce)</code>. The server computes the same value and compares (<code>Lobby.adminLogin()</code>). The password never crosses the network, a captured proof is useless on another connection, and 5 failures close the connection.</li>
+  <li><b>Admin (Control Room):</b> <b>challenge-response</b>. Each connection gets a random <code>nonce</code>, and the browser sends <code>HMAC(SHA-256(password), nonce)</code>. The server computes the same value and compares (<code>AdminConsole.login()</code>). The password never crosses the network, a captured proof is useless on another connection, and 5 failures close the connection.</li>
 </ul>
 <h4>4. Authorization and server-authoritative rules</h4>
 <p>Admin-only commands (<code>stats</code>, <code>dns</code>, <code>url</code>) return <b>FORBIDDEN</b> without login. In <code>Room.move()</code> the server checks: is there a game, is the sender a player (not a spectator), is it their turn, is the cell legal (<code>Board.whyIllegal()</code>)? A hacked browser can't cheat because the client only sends "I want cell N".</p>
@@ -405,7 +405,7 @@ open(): recompute the HMAC → mismatch?  → <span class="k">TAMPER</span>   (c
   <dt>Why does seq stop replays?</dt><dd>The server remembers the last accepted seq. A copied old frame has a smaller or equal seq and is rejected, even though its MAC is valid.</dd>
   <dt>Why not send the admin password directly?</dt><dd>It would be visible to anyone sniffing the Wi-Fi. With challenge-response the server proves you know it without it ever being transmitted.</dd>
 </dl>
-<div class="box tip"><b class="h">Make it yours</b>Change the rate limit in <code>Connection.java</code> (<code>new TokenBucket(40, 20)</code>) to <code>(10, 5)</code>, rebuild, and show that the flood now drops more messages. Or change the admin lock-out from 5 to 3 attempts in <code>Lobby.adminLogin()</code>.</div>
+<div class="box tip"><b class="h">Make it yours</b>Change the rate limit in <code>Connection.java</code> (<code>new TokenBucket(40, 20)</code>) to <code>(10, 5)</code>, rebuild, and show that the flood now drops more messages. Or change the admin lock-out from 5 to 3 attempts in <code>AdminConsole.login()</code>.</div>
 
 <!-- ======================================================================= PART C -->
 <h2 class="newpage">Part C — Practical checklist for the team</h2>

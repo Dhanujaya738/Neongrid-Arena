@@ -137,11 +137,11 @@
   <h3>3.1 Code organisation</h3>
   <table>
     <tr><th style="width:20%">Package</th><th>Classes and responsibility</th></tr>
-    <tr><td><code>arena.server</code></td><td><b>Reactor</b> (selector loop, timers, worker hand-off) · <b>Connection</b> (buffers, framing, sniffing, rate limit, packet capture) · <b>Http</b>, <b>WebSocket</b> · <b>Discovery</b> (UDP) · <b>Lobby</b> (handshake, matchmaking, admin login), <b>Room</b>, <b>Session</b> · <b>Leaderboard</b>, <b>Metrics</b>, <b>NetUtil</b></td></tr>
+    <tr><td><code>arena.server</code></td><td><b>Reactor</b> (selector loop, timers, worker hand-off) · <b>Connection</b> (buffers, framing, sniffing, rate limit, packet capture) · <b>Http</b>, <b>WebSocket</b> · <b>Discovery</b> (UDP) · <b>Lobby</b> (sessions, matchmaking, routing), <b>SecureHandshake</b> (DH + resume), <b>AdminConsole</b> (Control Room login and tools), <b>Room</b>, <b>Session</b> · <b>Leaderboard</b>, <b>Metrics</b>, <b>NetUtil</b></td></tr>
     <tr><td><code>arena.game</code></td><td><b>Board</b>: rules for both modes · <b>AiPlayer</b>: <code>Callable&lt;Result&gt;</code> MCTS / minimax</td></tr>
     <tr><td><code>arena.common</code></td><td><b>Crypto</b>: DH, SHA, HMAC · <b>SecureLink</b>: sign / verify / sequence numbers · <b>Json</b></td></tr>
     <tr><td><code>arena.client</code></td><td><b>ConsoleClient</b> · <b>BotSwarm</b> · <b>LanScanner</b> · <b>Handshake</b></td></tr>
-    <tr><td><code>web/</code></td><td><code>index.html</code>, <code>game.css</code>, <code>game.js</code> (game) · <code>control.html</code>, <code>control.js</code> (Control Room) · <code>net.js</code> (shared pure-JS SHA-256/HMAC, BigInt DH, secure socket)</td></tr>
+    <tr><td><code>web/</code></td><td><code>index.html</code>, <code>game.css</code>, <code>js/game/*.js</code> (game, split into modules: main, board, home, chat, result, tutorial…) · <code>control.html</code>, <code>control.css</code>, <code>control.js</code> (Control Room) · <code>net.js</code> (shared pure-JS SHA-256/HMAC, BigInt DH, secure socket)</td></tr>
   </table>
   <h3>3.2 Wire protocol</h3>
   <p>One TCP port speaks three protocols, and the first four bytes decide which (<i>protocol sniffing</i>): <code>NGA1</code> selects the RAW protocol used by the Java clients, and anything else is HTTP. <code>GET /ws</code> with <code>Upgrade: websocket</code> is answered with <code>101 Switching Protocols</code>.</p>
@@ -166,7 +166,7 @@ S→C {<span class="s">"t":"welcome"</span>,<span class="t">"dh":"g^b mod p"</sp
     <tr><td>3</td><td>Multithreading, Callable/Future</td><td>L5</td><td>AiPlayer, Reactor.submit, Leaderboard</td><td>Control Room · Threads &amp; AI</td></tr>
     <tr><td>4</td><td>UDP discovery</td><td>UDP</td><td>Discovery, LanScanner</td><td>Terminal client · UDP panel</td></tr>
     <tr><td>5</td><td>Addressing, URLs, DNS</td><td>L4</td><td>Http, NetUtil</td><td>Invite link/QR · URL &amp; DNS tools</td></tr>
-    <tr><td>6</td><td>Secure network programming</td><td>Secure NP</td><td>Crypto, SecureLink, net.js, Lobby</td><td>Control Room · Security lab</td></tr>
+    <tr><td>6</td><td>Secure network programming</td><td>Secure NP</td><td>Crypto, SecureLink, net.js, SecureHandshake, AdminConsole</td><td>Control Room · Security lab</td></tr>
   </table>
 
   <div class="concept-head"><h3>4.1 Java NIO reactor</h3><span class="owner">Member A</span></div>

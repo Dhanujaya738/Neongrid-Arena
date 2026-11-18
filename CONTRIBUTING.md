@@ -54,8 +54,8 @@ Open the repository page, click **Compare & pull request**, describe what you ch
 | B · TCP / URL / DNS | `src/arena/server/Http.java`, `WebSocket.java`, `NetUtil.java`, `src/arena/client/ConsoleClient.java` |
 | C · Threads / AI | `src/arena/game/AiPlayer.java`, `src/arena/server/Leaderboard.java`, `Metrics.java` |
 | D · UDP | `src/arena/server/Discovery.java`, `src/arena/client/LanScanner.java` |
-| E · Security | `src/arena/common/Crypto.java`, `SecureLink.java`, `src/arena/server/Lobby.java`, `web/js/net.js` |
-| Everyone | `web/` (game and Control Room UI), `docs/` |
+| E · Security | `src/arena/common/Crypto.java`, `SecureLink.java`, `src/arena/server/SecureHandshake.java`, `AdminConsole.java`, `web/js/net.js` |
+| Everyone | `src/arena/server/Lobby.java`, `Room.java` (game flow) · `web/js/game/` (game UI modules) · `web/control.html`, `web/js/control.js` · `docs/` |
 
 If two people need to change the same file, tell each other first to avoid merge conflicts.
 

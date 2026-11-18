@@ -247,15 +247,17 @@ final class Room {
         }
         int side = sideOf(s);
         if (side == 0) return;
-        if (phase == Phase.PLAYING) {
+        // Remove the leaver first, so the final broadcast doesn't pull them back into the game screen.
+        s.room = null;
+        cancelGrace(s);
+        boolean resigned = phase == Phase.PLAYING;
+        if (resigned) {
             system("🏳️ " + s.name + " left the game");
             board.forfeit(side);
             finish("resign");
         }
-        s.room = null;
-        cancelGrace(s);
         if (phase == Phase.WAITING || !anyHumanPresent()) close();
-        else { system("👋 " + s.name + " left the room"); broadcast(); }
+        else if (!resigned) { system("👋 " + s.name + " left the room"); broadcast(); }
     }
 
     void onDisconnect(Session s) {
