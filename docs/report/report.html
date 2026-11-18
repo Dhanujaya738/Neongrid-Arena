@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NeonGrid — Project Report</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm; }
+  @page :first { margin: 0; }
+  :root { --ink: #10142b; --muted: #5a6182; --line: #dfe3f0; --v: #7c3aed; --soft: #f5f7fc; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Inter, system-ui, sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.45; margin: 0; }
+  h2 { font-size: 17pt; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); page-break-after: avoid; }
+  h2 .n { color: var(--v); margin-right: 8px; }
+  h3 { font-size: 12.5pt; margin: 16px 0 6px; color: #1e2550; page-break-after: avoid; }
+  p { margin: 0 0 8px; text-align: justify; }
+  code, pre { font-family: 'Cascadia Code', Consolas, monospace; }
+  code { font-size: 9pt; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+  pre { font-size: 8.4pt; line-height: 1.42; background: #0d1124; color: #e5e9ff; padding: 10px 12px; border-radius: 8px; white-space: pre-wrap; page-break-inside: avoid; margin: 6px 0 10px; }
+  pre .c { color: #7d86b3; } pre .k { color: #f472b6; } pre .s { color: #a3e635; } pre .t { color: #22d3ee; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 9.4pt; }
+  tr { page-break-inside: avoid; }
+  th { background: #1e2550; color: #fff; text-align: left; padding: 6px 8px; font-weight: 600; }
+  td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfe; }
+  .section { margin-top: 26px; }
+  .cover + .section { margin-top: 0; }
+  figure { margin: 10px 0 14px; page-break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border-radius: 8px; border: 1px solid var(--line); }
+  figcaption { font-size: 9pt; color: var(--muted); margin-top: 4px; }
+  .figrow { display: flex; gap: 10px; justify-content: center; align-items: flex-start; page-break-inside: avoid; margin: 10px 0 14px; }
+  .figrow figure { margin: 0; flex: 1; }
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--soft); page-break-inside: avoid; margin: 8px 0; }
+  .box b.h { display: block; color: var(--v); font-size: 9pt; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
+  ul, ol { margin: 0 0 8px; padding-left: 20px; } li { margin-bottom: 2px; }
+  .ok { color: #15803d; font-weight: 600; }
+  .concept-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .owner { font-size: 9pt; color: var(--muted); border: 1px dashed #b7bdd8; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .cover { height: 297mm; width: 210mm; background: #060714; color: #e8ecff; position: relative; overflow: hidden; padding: 30mm 22mm; }
+  .cover .grid { position: absolute; left: -20%; right: -20%; bottom: -5%; height: 55%; background-image: linear-gradient(rgba(167,139,250,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,.35) 1px, transparent 1px); background-size: 46px 46px; transform: perspective(420px) rotateX(60deg); transform-origin: top; opacity: .5; }
+  .cover .glow1 { position: absolute; width: 140mm; height: 140mm; border-radius: 50%; background: radial-gradient(circle, rgba(34,211,238,.45), transparent 65%); top: -50mm; left: -40mm; }
+  .cover .glow2 { position: absolute; width: 160mm; height: 160mm; border-radius: 50%; background: radial-gradient(circle, rgba(244,114,182,.38), transparent 65%); bottom: -70mm; right: -60mm; }
+  .cover .inner { position: relative; z-index: 2; }
+  .cover .kicker { font-family: Consolas, monospace; letter-spacing: .3em; font-size: 10pt; color: #a5adcf; }
+  .cover h1 { font-size: 50pt; margin: 12mm 0 3mm; letter-spacing: .06em; font-weight: 900; }
+  .cover h1 span { color: #22d3ee; } .cover h1 em { font-style: normal; color: #f472b6; }
+  .cover .sub { font-size: 14pt; color: #c7cdf0; max-width: 160mm; }
+  .cover .shot { margin-top: 10mm; width: 150mm; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); }
+  .cover table { margin-top: 9mm; color: #e8ecff; font-size: 10.5pt; width: 160mm; }
+  .cover th { background: rgba(255,255,255,.12); }
+  .cover td { border-color: rgba(255,255,255,.14); background: transparent !important; }
+  .cover .foot { position: absolute; bottom: 16mm; left: 22mm; right: 22mm; z-index: 2; display: flex; justify-content: space-between; font-size: 10pt; color: #a5adcf; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="glow1"></div><div class="glow2"></div><div class="grid"></div>
+  <div class="inner">
+    <div class="kicker">NETWORK PROGRAMMING · ASSIGNMENT 02</div>
+    <h1>NEON<span>GR</span><em>ID</em></h1>
+    <div class="sub">A real-time multiplayer Ultimate Tic-Tac-Toe game, powered by a Java NIO reactor written from scratch and secured with Diffie-Hellman and HMAC-signed frames.</div>
+    <img class="shot" src="img/03-game.jpg">
+    <table>
+      <tr><th>Member</th><th>Index number</th><th>Concept implemented</th></tr>
+      <tr><td>Member A — <i>name</i></td><td><i>…</i></td><td>Java NIO reactor</td></tr>
+      <tr><td>Member B — <i>name</i></td><td><i>…</i></td><td>TCP, WebSocket &amp; URL/DNS</td></tr>
+      <tr><td>Member C — <i>name</i></td><td><i>…</i></td><td>Multithreading &amp; AI</td></tr>
+      <tr><td>Member D — <i>name</i></td><td><i>…</i></td><td>UDP LAN discovery</td></tr>
+      <tr><td>Member E — <i>name</i></td><td><i>…</i></td><td>Secure network programming</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Module: Network Programming · Lecturer: W.A.G. Nilnuwani</span><span>Submitted: November 2026</span></div>
+</div>
+
+<!-- ============================================================ 1 -->
+<div class="section">
+  <h2><span class="n">1</span>Introduction</h2>
+  <p><b>NeonGrid</b> is a multiplayer board-game platform built for Assignment 02, based on the suggested project <i>"Multiplayer Board Game Platform"</i>. A Java server hosts turn-based games of <b>Ultimate Tic-Tac-Toe</b> (a 9×9 strategy variant) and <b>Classic Tic-Tac-Toe</b>. It creates and joins rooms, matches players, validates every turn on the server, keeps all players and spectators in sync, and shows the results.</p>
+  <p>We designed the product as <b>two separate applications</b>:</p>
+  <ul>
+    <li><b>The game</b> (<code>/</code>) is for players. It contains no technical information: a splash screen, home menu, matchmaking, friend rooms with QR codes, an animated how-to-play guide, a board that always shows where you may play, chat and emoji reactions, and a victory screen.</li>
+    <li><b>The Network Control Room</b> (<code>/control</code>) is password-protected and meant for evaluators and administrators. It makes the networking visible without disturbing the players: a live server dashboard, a server-side packet capture, an attack lab, the handshake view, connections, threads, UDP, URL and DNS tools.</li>
+  </ul>
+  <p>The server uses only the JDK. Its core is a hand-written <b>Java NIO reactor</b>: one <code>Selector</code> thread serves HTTP, WebSocket, a custom binary TCP protocol and UDP discovery at the same time. CPU-heavy work runs on a thread pool, and every message is protected by a key that is agreed with Diffie-Hellman and never sent over the network.</p>
+
+  <h3>1.1 Feature summary</h3>
+  <table>
+    <tr><th style="width:24%">Area</th><th>Features</th></tr>
+    <tr><td>Gameplay</td><td>Ultimate 9×9 and Classic 3×3 · Quick Match · private rooms (4-letter code, invite link, QR code) · spectating · chat and reactions · rematch with side swap · turn clock · Elo "Hall of Fame"</td></tr>
+    <tr><td>Player guidance</td><td>Playable board glows and others dim · hover preview "this move sends your opponent here" · free-move warning · 3-step animated tutorial shown before the first Ultimate game</td></tr>
+    <tr><td>AI opponent</td><td>NeonBot (Rookie / Pro / Legend): Monte-Carlo Tree Search for Ultimate and minimax with alpha-beta pruning for Classic, run as a <code>Callable</code> on the worker pool</td></tr>
+    <tr><td>Clients</td><td>Browser game (desktop and phone) · terminal client using blocking <code>java.net.Socket</code> · NIO load-testing bot swarm · UDP LAN scanner</td></tr>
+    <tr><td>Resilience</td><td>Automatic reconnect with <b>session resume</b>: a player who refreshes the page or loses Wi-Fi keeps their seat for 30 s</td></tr>
+    <tr><td>Control Room</td><td>Password login (challenge-response) · sockets-vs-threads dashboard · packet capture · attack lab (9 attacks) · connections and rooms · AI telemetry · UDP/URL/DNS tools</td></tr>
+  </table>
+</div>
+
+<!-- ============================================================ 2 -->
+<div class="section">
+  <h2><span class="n">2</span>The game: player experience</h2>
+  <p>The player only sees the game. All network activity happens invisibly underneath. The flow is <b>splash → home → match → result</b>.</p>
+  <div class="figrow">
+    <figure><img src="img/01-splash.jpg"><figcaption>Figure 1 — Splash: animated logo, enter a name, PLAY.</figcaption></figure>
+    <figure><img src="img/02-home.jpg"><figcaption>Figure 2 — Home: mode cards, Quick Match, NeonBot levels, Play a Friend, Hall of Fame, live games.</figcaption></figure>
+  </div>
+  <h3>2.1 Rules and how a game ends</h3>
+  <ol>
+    <li>The board is made of 9 small boards. Three in a row inside a small board <b>claims</b> it.</li>
+    <li><b>Your move sends your opponent:</b> the cell position you play (1–9) is the small board your opponent must play next. That board glows, and the others are dimmed.</li>
+    <li>If you're sent to a finished board, you get a <b>free move</b> in any open board.</li>
+    <li>Claiming three small boards in a row wins. The game also ends in a <b>draw</b> (all boards decided, no line), a <b>timeout</b> (45 s per move in Ultimate, 20 s in Classic), a <b>resignation</b> (leaving) or a <b>disconnect</b> longer than 30 s.</li>
+  </ol>
+  <figure><img src="img/03-game.jpg" style="width:82%"><figcaption>Figure 3 — In game. Top: both players with timer rings and a big turn indicator. Centre: the board, where only the cyan board can be played; hovering a cell shows the board it will send NeonBot to. Bottom: leave, emoji reactions, chat.</figcaption></figure>
+  <div class="figrow">
+    <figure><img src="img/04-friend-room.jpg" style="width:88%"><figcaption>Figure 4 — Friend room on a phone: code tiles, a QR code with the LAN invite URL, Copy and Share.</figcaption></figure>
+    <figure><img src="img/06-tutorial.jpg" style="width:88%"><figcaption>Figure 5 — The animated how-to-play guide explaining the "send" rule.</figcaption></figure>
+    <figure><img src="img/05-result.jpg" style="width:88%"><figcaption>Figure 6 — Result screen with the reason, rating change, Play again (rematch) and Home.</figcaption></figure>
+  </div>
+</div>
+
+<!-- ============================================================ 3 -->
+<div class="section">
+  <h2><span class="n">3</span>System architecture</h2>
+  <p>The server follows the <b>Reactor pattern</b>. A single thread named <code>nio-selector</code> owns a <code>Selector</code> where every channel is registered: the listening <code>ServerSocketChannel</code> (OP_ACCEPT), every client <code>SocketChannel</code> (OP_READ, plus OP_WRITE only while output is queued) and a <code>DatagramChannel</code> for UDP. Slow work is handed to an <code>ExecutorService</code>, and its result is applied back on the selector thread. Because game state is touched by one thread only (thread confinement), rooms need no locks.</p>
+<pre> Browser (game / control)   ConsoleClient (blocking Socket)   BotSwarm (NIO)   LanScanner (UDP)
+        │ ws://host:8080/ws          │ "NGA1"+[len][frame]          │                │ broadcast :8888
+        └──────────────┬─────────────┴──────────────┬───────────────┘                │
+                       ▼                            ▼                                ▼
+          ┌─────────────────── <span class="t">nio-selector thread (Reactor, one Selector)</span> ─────────────────────┐
+          │ ServerSocketChannel OP_ACCEPT · SocketChannel OP_READ/OP_WRITE · DatagramChannel     │
+          │ protocol sniffing → HTTP | WebSocket | RAW · ByteBuffer read→flip→decode→compact      │
+          │ SecureLink (HMAC + seq) → Lobby / Rooms (thread-confined state) · timers · capture    │
+          └──────────────┬────────────────────────────────────────────▲─────────────────────────┘
+                         │ submit(Callable)                            │ Future.isDone() → get()
+                         ▼                                             │
+              <span class="k">ExecutorService "arena-worker-1..N"</span>: AI search · DH modPow · DNS · disk writes</pre>
+  <h3>3.1 Code organisation</h3>
+  <table>
+    <tr><th style="width:20%">Package</th><th>Classes and responsibility</th></tr>
+    <tr><td><code>arena.server</code></td><td><b>Reactor</b> (selector loop, timers, worker hand-off) · <b>Connection</b> (buffers, framing, sniffing, rate limit, packet capture) · <b>Http</b>, <b>WebSocket</b> · <b>Discovery</b> (UDP) · <b>Lobby</b> (handshake, matchmaking, admin login), <b>Room</b>, <b>Session</b> · <b>Leaderboard</b>, <b>Metrics</b>, <b>NetUtil</b></td></tr>
+    <tr><td><code>arena.game</code></td><td><b>Board</b>: rules for both modes · <b>AiPlayer</b>: <code>Callable&lt;Result&gt;</code> MCTS / minimax</td></tr>
+    <tr><td><code>arena.common</code></td><td><b>Crypto</b>: DH, SHA, HMAC · <b>SecureLink</b>: sign / verify / sequence numbers · <b>Json</b></td></tr>
+    <tr><td><code>arena.client</code></td><td><b>ConsoleClient</b> · <b>BotSwarm</b> · <b>LanScanner</b> · <b>Handshake</b></td></tr>
+    <tr><td><code>web/</code></td><td><code>index.html</code>, <code>game.css</code>, <code>game.js</code> (game) · <code>control.html</code>, <code>control.js</code> (Control Room) · <code>net.js</code> (shared pure-JS SHA-256/HMAC, BigInt DH, secure socket)</td></tr>
+  </table>
+  <h3>3.2 Wire protocol</h3>
+  <p>One TCP port speaks three protocols, and the first four bytes decide which (<i>protocol sniffing</i>): <code>NGA1</code> selects the RAW protocol used by the Java clients, and anything else is HTTP. <code>GET /ws</code> with <code>Upgrade: websocket</code> is answered with <code>101 Switching Protocols</code>.</p>
+<pre><span class="c">// RAW (Java clients)                    WebSocket (browsers)</span>
+[int32 length][UTF-8 payload]            FIN|opcode, MASK|len(7/16/64 bit), mask key, masked payload
+<span class="c">// handshake (plain)</span>
+C→S {<span class="s">"t":"hello"</span>,"name":"Nilu","client":"web",<span class="t">"dh":"g^a mod p"</span>,"resume":{"sid","proof"}?}
+S→C {<span class="s">"t":"welcome"</span>,<span class="t">"dh":"g^b mod p"</span>,"sid":"…","tokenWrapped":"…"}      <span class="c">// K = SHA-256(hex(g^ab mod p))</span>
+<span class="c">// every later frame, both directions</span>
+<span class="k">&lt;HMAC-SHA256(K, json) as 64 hex&gt;</span>{"t":"move","cell":40,<span class="t">"seq":7</span>}
+<span class="c">// control-room login (password never sent)</span>
+{"t":"admin_login","proof": HMAC( SHA-256(password), serverNonce )}</pre>
+</div>
+
+<!-- ============================================================ 4 -->
+<div class="section">
+  <h2><span class="n">4</span>Network programming concepts implemented</h2>
+  <table>
+    <tr><th>#</th><th>Concept</th><th>Lecture</th><th>Main source files</th><th>Demonstrated in</th></tr>
+    <tr><td>1</td><td>Java NIO reactor</td><td>NIO</td><td>Reactor, Connection, BotSwarm</td><td>Control Room · Overview</td></tr>
+    <tr><td>2</td><td>TCP &amp; application protocols</td><td>L2</td><td>Http, WebSocket, ConsoleClient</td><td>Packet capture · terminal client</td></tr>
+    <tr><td>3</td><td>Multithreading, Callable/Future</td><td>L5</td><td>AiPlayer, Reactor.submit, Leaderboard</td><td>Control Room · Threads &amp; AI</td></tr>
+    <tr><td>4</td><td>UDP discovery</td><td>UDP</td><td>Discovery, LanScanner</td><td>Terminal client · UDP panel</td></tr>
+    <tr><td>5</td><td>Addressing, URLs, DNS</td><td>L4</td><td>Http, NetUtil</td><td>Invite link/QR · URL &amp; DNS tools</td></tr>
+    <tr><td>6</td><td>Secure network programming</td><td>Secure NP</td><td>Crypto, SecureLink, net.js, Lobby</td><td>Control Room · Security lab</td></tr>
+  </table>
+
+  <div class="concept-head"><h3>4.1 Java NIO reactor</h3><span class="owner">Member A</span></div>
+  <p>Traditional I/O needs one blocking thread per client. NeonGrid instead registers every channel with <b>one Selector</b> in non-blocking mode. The loop waits in <code>select(timeout)</code>, where the timeout is the time until the next turn clock or timer, and dispatches accept, read and write readiness.</p>
+<pre><span class="k">while</span> (running) {
+    <span class="k">int</span> ready = wait == 0 ? selector.selectNow() : selector.select(wait);
+    Iterator&lt;SelectionKey&gt; it = selector.selectedKeys().iterator();
+    <span class="k">while</span> (it.hasNext()) { SelectionKey key = it.next(); it.remove(); dispatch(key); }
+    runTasks(); completeJobs(); runTimers();   <span class="c">// cross-thread tasks, finished Futures, turn clocks</span>
+}</pre>
+  <p><b>ByteBuffer discipline:</b> <code>channel.read(in)</code> → <code>in.flip()</code> → decode every <i>complete</i> frame → <code>in.compact()</code>. <code>compact()</code> keeps a half-received frame at the front of the buffer so the next read appends to it, which is the "LOGIN Amal\nPASS" scenario from the lecture. Frame headers are first <i>peeked</i> with an absolute <code>getInt(position)</code>, so nothing is consumed until the whole frame has arrived. <b>Writes</b> try <code>channel.write()</code> immediately. After a partial write, the rest is queued and <code>OP_WRITE</code> is enabled until the queue drains. Static files are read with <code>FileChannel</code>, and the BotSwarm client drives hundreds of <code>SocketChannel</code>s with <code>OP_CONNECT</code>/<code>finishConnect()</code> from one thread.</p>
+
+  <div class="concept-head"><h3>4.2 TCP and application protocols</h3><span class="owner">Member B</span></div>
+  <p>The TCP lifecycle appears at every layer: the three-way handshake completes when <code>accept()</code> returns, and a read of <code>-1</code> means the peer sent FIN. On top of the TCP byte stream we implemented three framing protocols ourselves: <b>HTTP/1.1</b> (static files, JSON endpoints, a <code>302</code> short-link redirect, security headers), <b>WebSocket</b> (the <code>Sec-WebSocket-Accept</code> SHA-1/Base64 handshake, 7/16/64-bit lengths, masking, fragmentation, ping/pong/close), and the <b>NGA1</b> length-prefixed protocol. <code>ConsoleClient</code> deliberately uses blocking <code>java.net.Socket</code> with <code>readInt()/readFully()</code> and three threads (reader, keyboard, heartbeat). It plays against browser users on the same server, showing that both I/O models interoperate.</p>
+
+  <div class="concept-head"><h3>4.3 Multithreading: thread pool, Callable/Future, synchronization</h3><span class="owner">Member C</span></div>
+  <p>The AI is the slowest task in the system: Monte-Carlo Tree Search runs 65,000–85,000 random playouts per move. It is implemented as <code>AiPlayer implements Callable&lt;Result&gt;</code> and submitted to a fixed <code>ThreadPoolExecutor</code>, which also runs the 2048-bit Diffie-Hellman <code>modPow</code>, DNS lookups and leaderboard writes.</p>
+<pre>FutureTask&lt;T&gt; f = <span class="k">new</span> FutureTask&lt;T&gt;(job) { <span class="k">protected void</span> done() { selector.wakeup(); } };
+pending.add(<span class="k">new</span> PendingJob&lt;&gt;(f, onResult, onError));  workers.execute(f);
+<span class="c">// later, on the selector thread:</span>
+<span class="k">if</span> (job.future.isDone()) onResult.accept(job.future.get());   <span class="c">// get() never blocks here</span></pre>
+  <p>Overriding <code>FutureTask.done()</code> guarantees the selector wakes only <i>after</i> the result has been published. That fixes a race in which the selector could wake up before the Future was marked done. <code>cancel(true)</code> interrupts a search when its room closes. The leaderboard is shared between the selector and a worker, so its methods are <code>synchronized</code>. Metrics use lock-free <code>LongAdder</code>s. The Control Room's <i>Threads &amp; AI</i> panel lists every bot move with its algorithm, playouts, time and the worker thread that ran it.</p>
+
+  <div class="concept-head"><h3>4.4 UDP: connectionless LAN discovery</h3><span class="owner">Member D</span></div>
+  <p>A non-blocking <code>DatagramChannel</code> (port 8888, <code>SO_BROADCAST</code>) is registered on the <i>same</i> Selector as the TCP sockets. <code>LanScanner</code> uses <code>java.net.DatagramSocket</code> to send the 20-byte query <code>NEONGRID_DISCOVER v1</code> to <code>255.255.255.255</code>, to each interface's directed broadcast address and to loopback. It sends three times because UDP is unreliable, and collects the JSON beacons (about 250 bytes: name, TCP port, LAN IPs, players, rooms). The terminal client and the bot swarm use this, so no IP address has to be typed.</p>
+<pre>  → UDP query 20 bytes to 255.255.255.255:8888
+  → UDP query 20 bytes to 192.168.8.255:8888
+  ← beacon 247 bytes from 10.0.236.10:8888
+  ✔ 10.0.236.10   tcp:8080  "NeonGrid Arena"  players=0 rooms=0  (27 ms)</pre>
+
+  <div class="concept-head"><h3>4.5 Addressing, URLs and DNS</h3><span class="owner">Member B / 6th member</span></div>
+  <ul>
+    <li><b>LAN addressing:</b> <code>NetworkInterface</code> enumeration keeps private (site-local) IPv4 addresses. The address of the default-route interface is found by "connecting" a UDP socket, which sends no packet, and is put first, so invite links work for phones on the same Wi-Fi.</li>
+    <li><b>URLs:</b> a friend room produces <code>http://192.168.x.x:8080/r/CODE</code>, shown as a link and a QR code. The server answers <code>302 Found</code> → <code>/?room=CODE</code>, and the browser reads the query string. Requests are parsed with <code>java.net.URI</code>. The Control Room's URL tool splits any URL into scheme, user-info, host, port (defaults come from <code>java.net.URL</code>), path, query and fragment, recognises opaque URNs, and shows the DNS hierarchy.</li>
+    <li><b>DNS:</b> forward (<code>getAllByName</code>, IPv4 and IPv6) and reverse (<code>getCanonicalHostName</code>) lookups block, so they run on worker threads. Every new connection is reverse-resolved for the connection table.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <div class="concept-head"><h3 style="margin-top:0">4.6 Secure network programming</h3><span class="owner">Member E</span></div>
+  <p>Players join over plain <code>http://</code> on campus or public Wi-Fi, which is the threat model from the Secure NP activity: eavesdropping, MITM, tampering, replay and DoS. Browsers disable <code>crypto.subtle</code> on insecure origins, so SHA-256 and HMAC are implemented in plain JavaScript and Diffie-Hellman uses <code>BigInt</code>. The Java side uses <code>MessageDigest</code>, <code>Mac</code> and <code>BigInteger</code>.</p>
+  <table>
+    <tr><th style="width:24%">Concept</th><th>Implementation</th></tr>
+    <tr><td>Key exchange</td><td>Diffie-Hellman, RFC 3526 group 14 (2048-bit safe prime, checked with <code>isProbablePrime</code>), 256-bit secrets, peer value validated. Only g<sup>a</sup> and g<sup>b</sup> cross the network.</td></tr>
+    <tr><td>Integrity / authenticity</td><td>Every frame carries <code>HMAC-SHA256(K, json)</code>, compared in constant time. Edits in transit and frames forged without K are rejected as <b>TAMPER</b>.</td></tr>
+    <tr><td>Replay protection</td><td>A strictly increasing <code>seq</code> in both directions. Resent frames are rejected as <b>REPLAY</b>.</td></tr>
+    <tr><td>Player authentication</td><td>The session token travels encrypted (XOR with SHA-256(K‖"token")). To resume, the client proves ownership with <code>HMAC(token, newDhPublic)</code>.</td></tr>
+    <tr><td>Admin authentication</td><td>The Control Room uses <b>challenge-response</b>: the server sends a per-connection nonce, and the browser returns <code>HMAC(SHA-256(password), nonce)</code>. The password never travels, a captured proof is useless on any other connection, and the connection is dropped after 5 failed attempts.</td></tr>
+    <tr><td>Authorization</td><td>Statistics, packet capture, DNS and URL tools are admin-only commands (<b>FORBIDDEN</b> otherwise). Spectators cannot move, and players move only on their turn and on legal cells (<b>INVALID_MOVE</b>).</td></tr>
+    <tr><td>DoS mitigation</td><td>Token bucket (40 burst, 20 msg/s) before any expensive work · 64 KB frame limit · 4 MB output backlog limit · idle/slowloris timeouts · connection cap.</td></tr>
+    <tr><td>Best practices</td><td>Input validation, path-traversal blocking (403), output escaping, security headers, no internals in error messages.</td></tr>
+  </table>
+  <div class="box"><b class="h">Scope note</b>The HMAC layer provides integrity, authenticity and replay protection, but not confidentiality, and unauthenticated DH cannot stop an active MITM who runs two separate handshakes. In production the same protocol would run inside TLS (<code>wss://</code>) with a CA-signed certificate.</div>
+
+  <h2 style="margin-top:22px"><span class="n">5</span>The Network Control Room</h2>
+  <p>The Control Room is a separate page that makes the networking visible. It connects over the same secure WebSocket as a player, then unlocks with the admin password. Its tabs are <b>Overview</b>, <b>Packet capture</b>, <b>Security lab</b>, <b>Connections &amp; rooms</b>, <b>Threads &amp; AI</b>, and <b>UDP · URL · DNS</b>.</p>
+  <figure><img src="img/07-control-overview.jpg" style="width:86%"><figcaption>Figure 7 — Overview under load: 153 open sockets on 10 JVM threads, the select() loop rate, throughput, the worker pool and compact() calls.</figcaption></figure>
+</div>
+
+<div class="section">
+  <figure style="margin-top:0"><img src="img/08-control-packets.jpg" style="width:86%"><figcaption>Figure 8 — Server-side packet capture (filtered to rejected frames): a replayed ping, two tampered or forged moves, and a flood stopped by the rate limiter, each shown with its sequence number and HMAC.</figcaption></figure>
+  <figure><img src="img/09-control-security.jpg" style="width:86%"><figcaption>Figure 9 — Security lab: the attacker "Mallory" completes the 5-step handshake in 23 ms, then every attack is answered by the server (green lines) and counted in the security log.</figcaption></figure>
+
+  <h2 style="margin-top:22px"><span class="n">6</span>Testing and results</h2>
+  <h3>6.1 Functional tests</h3>
+  <table>
+    <tr><th>Test</th><th>Result</th></tr>
+    <tr><td>Game vs NeonBot (all levels): forced board, dimming, hover preview, claimed boards, win line, result screen, rematch</td><td class="ok">Pass</td></tr>
+    <tr><td>Two players via Quick Match and via a private room with code, link and QR; Elo update on the Hall of Fame</td><td class="ok">Pass</td></tr>
+    <tr><td>Terminal client (blocking Socket) finds the server by UDP and plays</td><td class="ok">Pass</td></tr>
+    <tr><td>Kill the connection or refresh mid-game → "Connection lost" → automatic resume into the same seat</td><td class="ok">Pass</td></tr>
+    <tr><td>Phone layout (375 px): splash, home, game, friend room, result and tutorial with no horizontal scroll</td><td class="ok">Pass</td></tr>
+    <tr><td>Control Room: wrong password refused ("4 attempts left"), correct password unlocks, statistics hidden without login</td><td class="ok">Pass</td></tr>
+  </table>
+  <h3>6.2 Security tests (Control Room attack lab)</h3>
+  <table>
+    <tr><th style="width:22%">Attack</th><th>What the attacker sends</th><th style="width:32%">Server response</th></tr>
+    <tr><td>Replay</td><td>A captured signed frame, resent byte for byte</td><td class="ok">REPLAY — seq already used</td></tr>
+    <tr><td>MITM tamper</td><td>Body signed with <code>cell:4</code>, changed to <code>cell:8</code></td><td class="ok">TAMPER — HMAC mismatch</td></tr>
+    <tr><td>Forgery</td><td>Frame signed with a random key</td><td class="ok">TAMPER — HMAC mismatch</td></tr>
+    <tr><td>Cheat</td><td>Valid signature, but the sender is a spectator or not in a room</td><td class="ok">SPECTATOR / NO_ROOM</td></tr>
+    <tr><td>Privilege escalation</td><td>Requests admin statistics and DNS without logging in</td><td class="ok">FORBIDDEN</td></tr>
+    <tr><td>Password guessing</td><td>Wrong password proof</td><td class="ok">Refused, connection dropped after 5 tries</td></tr>
+    <tr><td>Path traversal</td><td><code>GET /..%2fbuild.ps1</code></td><td class="ok">HTTP 403 Forbidden</td></tr>
+    <tr><td>Flood (DoS)</td><td>150 messages in about 20 ms</td><td class="ok">RATE_LIMIT — 110 dropped</td></tr>
+    <tr><td>Silent sockets</td><td>Connections with no traffic</td><td class="ok">IDLE — closed (45 s)</td></tr>
+  </table>
+  <h3>6.3 Load test</h3>
+  <p><code>BotSwarm</code> opened hundreds of real secure TCP connections from <b>one client thread</b>. In a 300-bot soak run the server held <b>301 sockets on 10 JVM threads</b> (1 selector + 8 workers + main/JVM) and processed <b>57,916 moves and 2,620 games</b> with 0 dropped connections, 0 server exceptions and 0 MAC failures, at about 1,500 frames per second.</p>
+</div>
+
+<div class="section">
+  <h2><span class="n">7</span>Demonstration plan (10 minutes)</h2>
+  <table>
+    <tr><th style="width:13%">Time</th><th style="width:17%">Member</th><th>Script</th></tr>
+    <tr><td>0:00–2:00</td><td>A · NIO</td><td>Start the server and open <code>/control</code> (password). Run <code>./scripts/run-bots.ps1 --bots 300</code>: sockets climb to about 300 while the JVM stays at about 10 threads. Explain the select loop and flip → decode → compact.</td></tr>
+    <tr><td>2:00–4:00</td><td>B · TCP/URL</td><td>Packet capture: plain hello/welcome, then signed frames, the WebSocket 101 upgrade and the handshake panel. Create a friend room: a phone scans the QR, the /r/CODE 302 redirect brings it into the game, and the two play live. Use the URL and DNS tools.</td></tr>
+    <tr><td>4:00–6:00</td><td>C · Threads</td><td>Play NeonBot Legend while Threads &amp; AI lists each move (≈80,000 playouts on arena-worker-N) and every other game keeps running. Explain Callable/Future and the synchronized leaderboard.</td></tr>
+    <tr><td>6:00–8:00</td><td>D · UDP</td><td>Run <code>./scripts/run-client.ps1</code> with no IP: broadcast query and beacon. Join the browser player's room from the terminal, and show the UDP panel.</td></tr>
+    <tr><td>8:00–10:00</td><td>E · Security</td><td>Explain the challenge-response login, fire the 9 attacks in the Security lab and show the security log, then turn Wi-Fi off and on and show the session resume.</td></tr>
+  </table>
+  <div class="box"><b class="h">Setup checklist</b>JDK 17+ · <code>./scripts/build.ps1</code> · allow Java through Windows Firewall on Private networks · laptop and phones on the same Wi-Fi (or a phone hotspot) · game on one screen, <code>/control</code> on another.</div>
+
+  <h2 style="margin-top:22px"><span class="n">8</span>Build and run</h2>
+<pre>./scripts/build.ps1                                     <span class="c"># javac --release 17 → out/ and neongrid-arena.jar</span>
+./scripts/run-server.ps1  [--admin-pass MySecret]       <span class="c"># TCP 8080 (HTTP+WebSocket+NGA1), UDP 8888</span>
+<span class="c"># game:      http://localhost:8080/        phones: http://&lt;LAN-IP&gt;:8080/</span>
+<span class="c"># control:   http://localhost:8080/control (default password arena-admin)</span>
+./scripts/run-client.ps1                                <span class="c"># terminal client (UDP discovery)</span>
+./scripts/run-bots.ps1 --bots 300                       <span class="c"># load test</span></pre>
+
+  <h2 style="margin-top:22px"><span class="n">9</span>Limitations and future work</h2>
+  <ul>
+    <li><b>TLS</b> through a non-blocking <code>SSLEngine</code> for confidentiality and certificate-based server authentication.</li>
+    <li><b>Accounts</b> with salted, iterated password hashes and a database instead of a JSON leaderboard file.</li>
+    <li><b>Delta updates</b> instead of full room state would cut outbound traffic by roughly 90 %.</li>
+    <li><b>Multi-reactor scaling:</b> one selector per CPU core.</li>
+  </ul>
+
+  <h2 style="margin-top:22px"><span class="n">10</span>Conclusion</h2>
+  <p>NeonGrid delivers a polished multiplayer game that players can enjoy without seeing any technical detail, together with a separate, password-protected Control Room in which every network concept from the module can be observed live. One NIO selector thread served 300 concurrent secure clients across three TCP protocols and a UDP service. CPU-heavy work ran on a thread pool through Callable/Future, and every message was authenticated and protected against replay with keys agreed by Diffie-Hellman. Each of the six concepts is a separate module that its owner can explain and demonstrate.</p>
+</div>
+</body>
+</html>

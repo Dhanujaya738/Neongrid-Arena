@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NeonGrid — Team Guide</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm; }
+  :root { --ink: #10142b; --muted: #5a6182; --line: #dfe3f0; --v: #7c3aed; --soft: #f5f7fc; --x: #0891b2; --o: #db2777; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Inter, system-ui, sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 26pt; margin: 0 0 4px; letter-spacing: .02em; }
+  h2 { font-size: 16pt; margin: 26px 0 10px; padding: 8px 12px; border-radius: 8px; color: #fff; background: linear-gradient(90deg, #1e2550, #4c1d95); page-break-after: avoid; }
+  h2.member { background: linear-gradient(90deg, #0e7490, #6d28d9 70%, #be185d); }
+  h3 { font-size: 12pt; margin: 16px 0 6px; color: #1e2550; page-break-after: avoid; border-left: 4px solid var(--v); padding-left: 8px; }
+  h4 { font-size: 10.5pt; margin: 12px 0 4px; color: #4c1d95; page-break-after: avoid; }
+  p { margin: 0 0 7px; }
+  code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 8.9pt; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+  pre { font-family: 'Cascadia Code', Consolas, monospace; font-size: 8.3pt; line-height: 1.42; background: #0d1124; color: #e5e9ff; padding: 10px 12px; border-radius: 8px; white-space: pre-wrap; page-break-inside: avoid; margin: 6px 0 10px; }
+  pre .c { color: #8a93c0; } pre .k { color: #f472b6; } pre .s { color: #a3e635; } pre .t { color: #22d3ee; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 9.3pt; }
+  tr { page-break-inside: avoid; }
+  th { background: #1e2550; color: #fff; text-align: left; padding: 6px 8px; font-weight: 600; }
+  td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfe; }
+  ul, ol { margin: 0 0 8px; padding-left: 20px; } li { margin-bottom: 3px; }
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--soft); page-break-inside: avoid; margin: 8px 0 12px; }
+  .box b.h { display: block; color: var(--v); font-size: 9pt; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+  .box.tip { background: #f0fdf4; border-color: #bbf7d0; } .box.tip b.h { color: #15803d; }
+  .box.warn { background: #fff7ed; border-color: #fed7aa; } .box.warn b.h { color: #c2410c; }
+  .qa dt { font-weight: 700; margin-top: 8px; color: #1e2550; page-break-after: avoid; }
+  .qa dt::before { content: 'Q  '; color: var(--o); }
+  .qa dd { margin: 2px 0 0 0; padding-left: 20px; }
+  .qa dd::before { content: 'A  '; color: var(--x); font-weight: 700; margin-left: -20px; }
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding: 4px 0 4px 34px; page-break-inside: avoid; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--v); color: #fff; font-weight: 700; font-size: 9pt; display: grid; place-items: center; }
+  .cover { padding: 18mm 0 6mm; border-bottom: 3px solid var(--ink); margin-bottom: 12px; }
+  .cover .k { font-family: Consolas, monospace; letter-spacing: .25em; font-size: 9pt; color: var(--muted); }
+  .cover p { color: var(--muted); font-size: 11pt; max-width: 165mm; }
+  .member-tag { display: inline-block; font-size: 9pt; padding: 2px 9px; border-radius: 99px; background: #ede9fe; color: #5b21b6; font-weight: 600; margin: 0 6px 6px 0; }
+  .newpage { page-break-before: always; }
+  .flow td:first-child { width: 28px; font-weight: 700; color: var(--v); text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="k">NETWORK PROGRAMMING · ASSIGNMENT 02 · TEAM GUIDE</div>
+  <h1>NeonGrid — how everything works</h1>
+  <p>One guide for the whole team. Part A explains the big picture, including why there is a separate Control Room and what happens to a single move from click to screen. Part B has one chapter per member: the concept, the files, how the code was built, how it works step by step, how it is used in the game, a 2-minute demo script, and the questions the evaluator is likely to ask, with answers.</p>
+  <span class="member-tag">A · Java NIO</span><span class="member-tag">B · TCP, WebSocket, URL &amp; DNS</span><span class="member-tag">C · Multithreading</span><span class="member-tag">D · UDP</span><span class="member-tag">E · Security</span>
+</div>
+
+<!-- ======================================================================= PART A -->
+<h2>Part A — The big picture</h2>
+
+<h3>A1. What we built, in one paragraph</h3>
+<p>NeonGrid is an online Ultimate Tic-Tac-Toe game. Players open a web page (on a laptop or phone), choose a name and play each other or an AI bot. Behind the page is <b>our own Java server</b>, written with no frameworks. It accepts every connection, speaks several network protocols, keeps the official game state, checks every move, and sends the new board to everyone in the room. A second page, the <b>Network Control Room</b>, lets the evaluator look inside the server while it runs.</p>
+
+<h3>A2. Why there is a separate Control Room</h3>
+<p>Early versions put the technical panels (packet inspector, security lab, connection info) inside the game. That made the game confusing: a normal player could not tell what the game was. So we separated the two, which is also how real systems are built.</p>
+<table>
+  <tr><th style="width:26%">Reason</th><th>Explanation</th></tr>
+  <tr><td><b>1. Good user experience</b></td><td>A player wants to play, not read HMAC values. The game page contains only game things: board, players, chat, results. This is the <i>separation of concerns</i> principle: each screen has one job.</td></tr>
+  <tr><td><b>2. Security (authorization)</b></td><td>The Control Room shows sensitive data: every player's IP address and port, reverse-DNS host names, server internals, and an <b>attack tool</b>. If that were in the game, any player could see other people's IPs or attack the server. So it is protected by an <b>admin password</b>, and the server refuses admin commands from anyone who hasn't logged in (<code>FORBIDDEN</code>). This is <i>least privilege</i> from the Secure NP lecture.</td></tr>
+  <tr><td><b>3. Networking is invisible</b></td><td>You cannot <i>see</i> NIO, threads, UDP or HMAC while playing. The evaluator needs proof that our concepts are really working. The Control Room makes them visible: "300 sockets on 10 threads", every packet with its MAC, every blocked attack, every AI job and which thread ran it.</td></tr>
+  <tr><td><b>4. It mirrors the real world</b></td><td>Real online games have a player app and, separately, an operations dashboard (like Grafana or Wireshark) that only engineers can open. Our project follows the same pattern.</td></tr>
+  <tr><td><b>5. No effect on players</b></td><td>The Control Room is just another (admin) client. Packet capture only runs while an admin is logged in (<code>metrics.captureOn</code>), so normal play is never slowed down.</td></tr>
+</table>
+<p><b>How to reach it:</b> click the small purple antenna icon at the top right of the game (it opens in a new tab), or go to <code>http://localhost:8080/control</code>. Password: <b><code>arena-admin</code></b>. Change it with <code>./scripts/run-server.ps1 --admin-pass NewPass</code>.</p>
+
+<h3>A3. The building blocks</h3>
+<table>
+  <tr><th style="width:24%">Part</th><th>What it is</th><th style="width:30%">Files</th></tr>
+  <tr><td>Server</td><td>One Java program. It listens on <b>TCP port 8080</b> (web pages, WebSocket, Java clients) and <b>UDP port 8888</b> (discovery)</td><td><code>src/arena/server/*</code></td></tr>
+  <tr><td>Game logic</td><td>Rules of both modes and the AI bot</td><td><code>src/arena/game/Board.java</code>, <code>AiPlayer.java</code></td></tr>
+  <tr><td>Shared crypto</td><td>Diffie-Hellman, SHA-256, HMAC, signed envelopes, mini JSON</td><td><code>src/arena/common/*</code></td></tr>
+  <tr><td>Web game</td><td>What players see</td><td><code>web/index.html</code>, <code>css/game.css</code>, <code>js/game.js</code></td></tr>
+  <tr><td>Control Room</td><td>What evaluators see</td><td><code>web/control.html</code>, <code>js/control.js</code></td></tr>
+  <tr><td>Browser networking</td><td>Secure WebSocket used by both pages</td><td><code>web/js/net.js</code></td></tr>
+  <tr><td>Java clients</td><td>Terminal player, 300-bot load tester, UDP scanner</td><td><code>src/arena/client/*</code></td></tr>
+</table>
+
+<h3>A4. The life of one move (memorise this: everyone should be able to explain it)</h3>
+<p>What happens when a player clicks a cell. Every member's concept appears somewhere in this chain, so it is the best way to explain how the parts fit together.</p>
+<table class="flow">
+  <tr><th>#</th><th>Step</th><th style="width:22%">Where</th><th style="width:12%">Member</th></tr>
+  <tr><td>1</td><td>Player clicks a glowing cell. The click handler sends <code>{t:"move", cell:40}</code></td><td><code>game.js → cell()</code></td><td>—</td></tr>
+  <tr><td>2</td><td>net.js adds a sequence number (<code>seq</code>), computes <code>HMAC-SHA256(key, json)</code>, puts the 64-hex MAC in front, and sends it as a WebSocket frame</td><td><code>net.js → send()</code></td><td>E</td></tr>
+  <tr><td>3</td><td>The bytes travel over the existing <b>TCP</b> connection inside a <b>WebSocket</b> frame (masked by the browser)</td><td>network</td><td>B</td></tr>
+  <tr><td>4</td><td>On the server, the <b>Selector</b> wakes up: the client's channel is <code>OP_READ</code>-ready</td><td><code>Reactor.run() → dispatch()</code></td><td>A</td></tr>
+  <tr><td>5</td><td><code>channel.read(buffer)</code> → <code>flip()</code> → decode one complete WebSocket frame → <code>compact()</code></td><td><code>Connection.onReadable()</code>, <code>WebSocket.decode()</code></td><td>A + B</td></tr>
+  <tr><td>6</td><td>Rate limiter checks the message isn't part of a flood (token bucket)</td><td><code>Connection.onText()</code></td><td>E</td></tr>
+  <tr><td>7</td><td>MAC verified (not tampered?) and <code>seq</code> checked (not a replay?)</td><td><code>SecureLink.open()</code></td><td>E</td></tr>
+  <tr><td>8</td><td>The lobby routes the message to the player's room. The room checks it's their turn and the move is legal</td><td><code>Lobby.onMessage()</code> → <code>Room.move()</code> → <code>Board.whyIllegal()</code></td><td>E (server-authoritative)</td></tr>
+  <tr><td>9</td><td>The board is updated, and the new state is <b>signed and sent to every player and spectator</b></td><td><code>Room.apply()</code> → <code>broadcast()</code> → <code>Connection.sendSecure()</code></td><td>A + E</td></tr>
+  <tr><td>10</td><td>If it's now the bot's turn, the AI is submitted to the <b>thread pool</b> as a <code>Callable</code>. The selector does <i>not</i> wait</td><td><code>Room.scheduleBot()</code> → <code>Reactor.submit()</code></td><td>C</td></tr>
+  <tr><td>11</td><td>When the worker finishes, its <code>Future</code> is done → <code>selector.wakeup()</code> → the selector applies the bot's move (back to step 9)</td><td><code>Reactor.completeJobs()</code></td><td>C</td></tr>
+  <tr><td>12</td><td>Each browser verifies the server's MAC and seq, then redraws the board</td><td><code>net.js → onmessage</code>, <code>game.js → onRoom()</code></td><td>E</td></tr>
+</table>
+<p><b>Before any of this,</b> the player found the server: a browser uses the URL (or a friend's invite link or QR code, Member B), and the Java terminal client finds the server by <b>UDP broadcast</b> (Member D). Then a <b>Diffie-Hellman handshake</b> created the secret key used in steps 2, 7 and 12 (Member E).</p>
+
+<h3>A5. Where each concept shows up for the demo</h3>
+<table>
+  <tr><th style="width:14%">Member</th><th>Concept</th><th>Show it in</th></tr>
+  <tr><td>A</td><td>Java NIO (Selector, channels, ByteBuffer)</td><td>Control Room → <b>Overview</b> while <code>./scripts/run-bots.ps1 --bots 300</code> runs</td></tr>
+  <tr><td>B</td><td>TCP, HTTP, WebSocket, URL, DNS</td><td>Control Room → <b>Packet capture</b>, Security lab handshake panel, <b>UDP · URL · DNS</b>; friend room invite + QR</td></tr>
+  <tr><td>C</td><td>Thread pool, Callable/Future, synchronization</td><td>Play NeonBot Legend; Control Room → <b>Threads &amp; AI</b></td></tr>
+  <tr><td>D</td><td>UDP broadcast discovery</td><td><code>./scripts/run-client.ps1</code> (no IP); Control Room → <b>UDP · URL · DNS</b></td></tr>
+  <tr><td>E</td><td>Security</td><td>Control Room login, <b>Security lab</b> (9 attacks), packet capture "only rejected frames"</td></tr>
+</table>
+
+<!-- ======================================================================= MEMBER A -->
+<h2 class="member newpage">Member A — Java NIO: one thread, every socket</h2>
+<p><b>Lecture:</b> Network Programming with NIO (channels, buffers, selectors, non-blocking I/O). <b>Your files:</b> <code>server/Reactor.java</code>, <code>server/Connection.java</code> (reading and writing parts), <code>client/BotSwarm.java</code>.</p>
+
+<h3>A.1 The concept in simple words</h3>
+<p>With traditional (blocking) I/O, a server needs <b>one thread per client</b>, because <code>read()</code> stops the thread until data arrives. 1000 players means 1000 threads, each using memory and causing context switches. With <b>NIO</b>, channels are put into <b>non-blocking</b> mode and registered with a <b>Selector</b>. One thread asks the selector "which channels are ready?" and only handles those. Nobody waits, so one thread can serve thousands of sockets.</p>
+<p>Think of a waiter: the blocking server hires one waiter per table who stands there waiting. The NIO server has one waiter who walks around and only serves tables that have raised their hand.</p>
+
+<h3>A.2 How it was built</h3>
+<h4>Step 1: open non-blocking channels and register them (Reactor constructor)</h4>
+<pre>selector = Selector.open();
+serverChannel = ServerSocketChannel.open();
+serverChannel.configureBlocking(<span class="k">false</span>);                      <span class="c">// non-blocking</span>
+serverChannel.bind(<span class="k">new</span> InetSocketAddress(config.tcpPort), 256);
+serverChannel.register(selector, SelectionKey.OP_ACCEPT);       <span class="c">// "tell me when a client connects"</span>
+udpChannel = DatagramChannel.open(); udpChannel.configureBlocking(<span class="k">false</span>);
+udpChannel.register(selector, SelectionKey.OP_READ);            <span class="c">// UDP on the SAME selector (Member D)</span></pre>
+<h4>Step 2: the event loop (<code>Reactor.run()</code>)</h4>
+<pre><span class="k">while</span> (running) {
+    <span class="k">int</span> ready = selector.select(wait);                <span class="c">// sleep until something is ready (or a timer is due)</span>
+    Iterator&lt;SelectionKey&gt; it = selector.selectedKeys().iterator();
+    <span class="k">while</span> (it.hasNext()) { SelectionKey key = it.next(); it.remove(); dispatch(key); }
+    runTasks();     <span class="c">// jobs posted by other threads</span>
+    completeJobs(); <span class="c">// finished worker Futures (Member C)</span>
+    runTimers();    <span class="c">// turn clocks, reconnect grace periods, 1-second stats tick</span>
+}</pre>
+<p><code>dispatch()</code> looks at the key: <b>acceptable</b> → <code>accept()</code> new clients; the UDP channel → <code>Discovery.onReadable()</code>; otherwise the key's attachment is that client's <code>Connection</code>, so it calls <code>onReadable()</code> / <code>onWritable()</code>.</p>
+<h4>Step 3: accepting clients (<code>Reactor.accept()</code>)</h4>
+<p>A non-blocking <code>accept()</code> returns <code>null</code> when nobody is waiting, so we loop until null. Each new <code>SocketChannel</code> is set non-blocking, registered for <code>OP_READ</code>, and gets a <code>Connection</code> object attached to its key.</p>
+<h4>Step 4: reading with ByteBuffer (<code>Connection.onReadable()</code>), the most important part</h4>
+<pre><span class="k">int</span> n = ch.read(in);                <span class="c">// copy whatever bytes arrived into the buffer (write mode)</span>
+<span class="k">if</span> (n &lt; 0) { close(...); <span class="k">return</span>; }   <span class="c">// -1 = the client closed the connection (TCP FIN)</span>
+in.flip();                          <span class="c">// switch to read mode: limit = position, position = 0</span>
+decode();                           <span class="c">// take out every COMPLETE frame</span>
+in.compact();                       <span class="c">// move unfinished bytes to the front, back to write mode</span></pre>
+<p>TCP is a <b>stream</b>: one read may contain half a message or three messages. <code>decode()</code> first <i>peeks</i> at the header without moving the position (<code>in.getInt(in.position())</code>). If the whole frame hasn't arrived yet it stops, and <code>compact()</code> keeps those bytes so the next read appends to them. This is exactly the lecture's "LOGIN Amal\nPASS" example. If a frame is bigger than the buffer, <code>growBuffer()</code> doubles it (up to 256 KB).</p>
+<h4>Step 5: protocol sniffing (one port, three protocols)</h4>
+<p>The first 4 bytes decide: <code>"NGA1"</code> → RAW mode (Java clients), anything else → HTTP. An HTTP request for <code>/ws</code> upgrades the same socket to WebSocket. These modes are the <code>Connection.Mode</code> enum: <code>SNIFF, HTTP, HTTP_DONE, WEBSOCKET, RAW</code>.</p>
+<h4>Step 6: writing and partial writes (<code>write()</code> / <code>onWritable()</code>)</h4>
+<p>We try <code>ch.write(buf)</code> straight away. If the OS send buffer is full, only part is written (a <b>partial write</b>). The rest goes into a queue and we add <code>OP_WRITE</code> interest. When the selector says the socket is writable we continue, and once the queue is empty we remove <code>OP_WRITE</code> again (otherwise the selector would wake up all the time).</p>
+<h4>Step 7: the NIO client (<code>BotSwarm</code>)</h4>
+<p>The load tester uses NIO on the <b>client</b> side too: hundreds of <code>SocketChannel</code>s opened with non-blocking <code>connect()</code>, completed on <code>OP_CONNECT</code> with <code>finishConnect()</code>, all from one thread. Static files are read with a <code>FileChannel</code> into a <code>ByteBuffer</code> (<code>Http.serveFile()</code>).</p>
+
+<h3>A.3 How it is used in the game</h3>
+<p>Every player, spectator, bot, terminal client and the Control Room is a channel on this one selector. Game state lives on the selector thread only, so rooms need no locks.</p>
+
+<h3>A.4 Your 2-minute demo</h3>
+<ol class="steps">
+  <li>Start the server, then open the Control Room → <b>Overview</b>. Point at the selector circle and the "open sockets vs JVM threads" card.</li>
+  <li>In a second PowerShell run <code>./scripts/run-bots.ps1 --bots 300</code>. Watch the sockets climb to about 300 while threads stay about 10.</li>
+  <li>Say: "Thread-per-client would need 300 threads. We use one selector thread plus 8 workers."</li>
+  <li>Open <code>Connection.java → onReadable()</code> and explain read → flip → decode → compact. Point at the <b>ByteBuffer compact()</b> and <b>partial writes</b> counters on the dashboard.</li>
+</ol>
+
+<h3>A.5 Likely questions</h3>
+<dl class="qa">
+  <dt>What does flip() do? And compact()?</dt><dd><code>flip()</code> switches from writing to reading: limit = current position, position = 0. <code>compact()</code> copies the unread bytes to the start and sets position after them, so we can keep writing new data without losing a half-received message.</dd>
+  <dt>Why not use clear() instead of compact()?</dt><dd><code>clear()</code> would throw away an incomplete frame. TCP can split a message across reads, so we must keep the partial bytes.</dd>
+  <dt>Why does accept() sometimes return null?</dt><dd>In non-blocking mode it returns immediately; null means there is no pending connection.</dd>
+  <dt>Why not keep OP_WRITE on all the time?</dt><dd>A socket is almost always writable, so the selector would wake up constantly (busy loop). We only register OP_WRITE while data is queued.</dd>
+  <dt>What happens if one client is slow?</dt><dd>Its data waits in its own queue. Nobody else is blocked. If the backlog passes 4 MB we disconnect it.</dd>
+  <dt>Is game state thread-safe?</dt><dd>Yes, by thread confinement: only the selector thread touches rooms. Workers send results back through a queue plus <code>selector.wakeup()</code>.</dd>
+</dl>
+<div class="box tip"><b class="h">Make it yours (recommended)</b>Change the initial buffer size in <code>Connection.java</code> (<code>ByteBuffer.allocate(8 * 1024)</code>) to 256 bytes and send a long chat message. The dashboard's compact counter rises and <code>growBuffer()</code> kicks in. Explain what you observed.</div>
+
+<!-- ======================================================================= MEMBER B -->
+<h2 class="member newpage">Member B — TCP, HTTP, WebSocket, URLs &amp; DNS</h2>
+<p><b>Lectures:</b> TCP/IP Networking in Java (L2), Addressing, Naming and URLs (L4). <b>Your files:</b> <code>server/Http.java</code>, <code>server/WebSocket.java</code>, <code>client/ConsoleClient.java</code>, <code>server/NetUtil.java</code>.</p>
+
+<h3>B.1 The concept in simple words</h3>
+<p>TCP gives a <b>reliable, ordered byte stream</b> between two programs, set up with the three-way handshake (SYN, SYN-ACK, ACK) and closed with FIN. But TCP has no idea where one message ends and the next begins, so every application must define its own <b>protocol</b> on top. We wrote three: <b>HTTP</b> (to deliver web pages), <b>WebSocket</b> (a two-way message channel for browsers) and <b>NGA1</b> (our own simple format for Java clients). URLs and DNS are how players <i>find</i> the server: an IP or host name, a port and a path.</p>
+
+<h3>B.2 How it was built</h3>
+<h4>HTTP (<code>Http.handle()</code>)</h4>
+<p>The connection collects bytes until it sees the blank line <code>\r\n\r\n</code> that ends HTTP headers. We split the request line (<code>GET /path HTTP/1.1</code>), parse headers into a map, and parse the target with <b><code>java.net.URI</code></b>. Then we route: <code>/</code> → game page, <code>/control</code> → Control Room page, <code>/r/CODE</code> → <b>302 redirect</b> to <code>/?room=CODE</code>, <code>/ws</code> → WebSocket upgrade, otherwise a static file. Responses include <code>Content-Length</code>, security headers and <code>Connection: close</code>.</p>
+<h4>WebSocket upgrade and frames (<code>WebSocket.java</code>), written by hand from RFC 6455</h4>
+<pre><span class="c">// browser:  GET /ws  Upgrade: websocket  Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</span>
+accept = Base64( SHA-1( key + <span class="s">"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"</span> ) )
+<span class="c">// server:   HTTP/1.1 101 Switching Protocols   Sec-WebSocket-Accept: accept</span>
+<span class="c">// from now on the same TCP socket carries frames:</span>
+[FIN+opcode][MASK+length 7/16/64-bit][4-byte mask][payload XOR mask]</pre>
+<p><code>decode()</code> reads the header, waits until the full frame is present, and un-masks the payload (browsers must mask, servers must not). It handles text, close, ping/pong and fragmented messages. <code>encode()</code> builds server frames.</p>
+<h4>NGA1 protocol (Java clients)</h4>
+<p>The client first sends the 4 bytes <code>NGA1</code>, then each message as <code>[4-byte length][UTF-8 JSON]</code>. This is the simplest correct way to mark message boundaries on a TCP stream.</p>
+<h4>The blocking client (<code>ConsoleClient</code>), traditional I/O for comparison</h4>
+<pre>Socket s = <span class="k">new</span> Socket(); s.connect(<span class="k">new</span> InetSocketAddress(host, port), 4000); <span class="c">// 3-way handshake</span>
+out.writeInt(b.length); out.write(b);        <span class="c">// send one frame</span>
+<span class="k">int</span> len = in.readInt(); in.readFully(buf);   <span class="c">// BLOCKS until the whole frame arrives</span></pre>
+<p>It uses three threads (socket reader, keyboard, heartbeat) because blocking calls stop a thread. It handles <code>UnknownHostException</code>, <code>ConnectException</code>, <code>SocketTimeoutException</code> and <code>EOFException</code> (server closed).</p>
+<h4>Addressing, URLs and DNS</h4>
+<ul>
+  <li><b>LAN IP</b> (<code>NetUtil.lanAddresses()</code>): lists network interfaces and keeps private IPv4s (10.x, 172.16–31.x, 192.168.x). To find the "main" one, it <i>connects</i> a UDP socket to 8.8.8.8 (no packet is sent) and asks which local address the OS would use.</li>
+  <li><b>Invite link</b>: <code>http://192.168.8.163:8080/r/K7QX</code> (scheme, host, port, path), shown as text and as a QR code. The server answers 302 → <code>/?room=K7QX</code>, and the game reads <code>room</code> from the query string.</li>
+  <li><b>URL anatomy tool</b> (<code>Http.urlAnatomy()</code>): splits any URL into scheme, user-info, host, port (default ports come from <code>java.net.URL</code>), path, query, fragment, and DNS levels (root / TLD / domain / subdomain). It recognises URNs like <code>urn:isbn:…</code>.</li>
+  <li><b>DNS</b> (<code>Http.dnsLookup()</code>): <code>InetAddress.getAllByName()</code> (forward, IPv4 and IPv6) and <code>getCanonicalHostName()</code> (reverse). DNS calls block, so they run on worker threads. Every new connection is reverse-resolved for the connection table (<code>Reactor.lookupHostAsync()</code>).</li>
+</ul>
+
+<h3>B.3 Your 2-minute demo</h3>
+<ol class="steps">
+  <li>Control Room → Security lab → <b>Connect attacker</b>: walk through the handshake panel (TCP → 101 upgrade → …).</li>
+  <li>Packet capture: untick "hide heartbeats" and show the plain <code>hello</code>/<code>welcome</code>, then signed frames with type, seq and size.</li>
+  <li>In the game, click <b>Create room</b>. A phone scans the QR, and point out the URL parts (host = LAN IP, port 8080, path /r/CODE → 302).</li>
+  <li>UDP · URL · DNS tab: parse a URL, resolve <code>www.uom.lk</code>, and show that it ran on <code>arena-worker-N</code>.</li>
+  <li>Run <code>./scripts/run-client.ps1</code> and show a blocking-socket client in the same game.</li>
+</ol>
+
+<h3>B.4 Likely questions</h3>
+<dl class="qa">
+  <dt>Why do we need our own framing if TCP is reliable?</dt><dd>TCP guarantees order and delivery of <i>bytes</i>, not message boundaries. Length prefixes (NGA1) or WebSocket headers tell the receiver where each message ends.</dd>
+  <dt>What is the 101 response?</dt><dd>"Switching Protocols": the server agrees to stop speaking HTTP on this TCP connection and start speaking WebSocket.</dd>
+  <dt>Why do browser frames have a mask?</dt><dd>The RFC requires it, to stop cache-poisoning attacks on proxies. The server XORs the payload with the 4-byte key.</dd>
+  <dt>URL vs URI vs URN?</dt><dd>A URI identifies a resource. A URL is a URI that also says where it is and how to reach it (<code>http://…</code>). A URN names it without a location (<code>urn:isbn:…</code>).</dd>
+  <dt>Why does the invite use an IP, not localhost?</dt><dd><code>localhost</code> means "this device". On the phone it would point to the phone itself, so we use the laptop's LAN IP.</dd>
+  <dt>Why is DNS lookup done on a worker thread?</dt><dd><code>InetAddress</code> calls block for up to seconds, and blocking the selector would freeze every player.</dd>
+</dl>
+<div class="box tip"><b class="h">Make it yours</b>Add a new endpoint in <code>Http.handle()</code>, e.g. <code>/api/time</code> returning the server time as JSON, and show it in the browser. Or change the short link from <code>/r/</code> to <code>/join/</code>.</div>
+
+<!-- ======================================================================= MEMBER C -->
+<h2 class="member newpage">Member C — Multithreading: thread pool, Callable &amp; Future</h2>
+<p><b>Lecture:</b> Multithreaded Server Applications (L5). <b>Your files:</b> <code>game/AiPlayer.java</code>, <code>Reactor.submit()</code> / <code>completeJobs()</code> / <code>execute()</code>, <code>server/Leaderboard.java</code>, <code>server/Metrics.java</code>.</p>
+
+<h3>C.1 The concept in simple words</h3>
+<p>The NIO selector thread must <b>never</b> do slow work, because while it is busy every player freezes (remember the lecture's banking example with one slow transaction). Slow jobs are handed to a <b>thread pool</b> (<code>ExecutorService</code>). A job that returns a value is a <b><code>Callable</code></b>; submitting it gives back a <b><code>Future</code></b>, a "receipt" you use later to check <code>isDone()</code> and collect the result with <code>get()</code>. When two threads share data, access must be <b>synchronized</b> to avoid race conditions.</p>
+
+<h3>C.2 How it was built</h3>
+<h4>The pool (Reactor constructor)</h4>
+<pre>workers = <span class="k">new</span> ThreadPoolExecutor(n, n, 30, TimeUnit.SECONDS, <span class="k">new</span> LinkedBlockingQueue&lt;&gt;(),
+        r -&gt; <span class="k">new</span> Thread(r, <span class="s">"arena-worker-"</span> + counter.incrementAndGet()));   <span class="c">// fixed pool, named threads</span></pre>
+<p><code>n</code> = number of CPU cores (8 on our laptop). The pool runs four kinds of job: <b>AI moves</b>, <b>Diffie-Hellman maths</b> for every new connection, <b>DNS lookups</b>, and <b>saving the leaderboard</b> to disk.</p>
+<h4>The AI as a Callable (<code>AiPlayer implements Callable&lt;Result&gt;</code>)</h4>
+<p><code>call()</code> picks a move. It is not machine learning, it is search:</p>
+<ul>
+  <li><b>Classic 3×3:</b> <i>minimax with alpha-beta pruning</i>. It tries every possible future game and picks the best move assuming perfect play (unbeatable on Legend).</li>
+  <li><b>Ultimate 9×9:</b> <i>Monte-Carlo Tree Search</i>. There are too many futures, so it plays thousands of random games (65,000–85,000 in 0.6–1.6 s) and picks the move that won most often.</li>
+  <li><b>Rookie/Pro</b> sometimes just play randomly so humans can win.</li>
+</ul>
+<p>You don't need to explain the algorithm in depth. The network point is: "it is CPU-heavy, so it is a Callable on the pool."</p>
+<h4>Submitting and collecting (<code>Reactor.submit()</code> + <code>completeJobs()</code>)</h4>
+<pre>FutureTask&lt;T&gt; f = <span class="k">new</span> FutureTask&lt;T&gt;(job) {
+    <span class="k">protected void</span> done() { selector.wakeup(); }   <span class="c">// runs AFTER the result is stored → wake the I/O thread</span>
+};
+pending.add(<span class="k">new</span> PendingJob&lt;&gt;(f, onResult, onError));
+workers.execute(f);                                    <span class="c">// a worker thread runs AiPlayer.call()</span>
+
+<span class="c">// on the selector thread, every loop:</span>
+<span class="k">if</span> (job.future.isDone()) onResult.accept(job.future.get());   <span class="c">// isDone() was true → get() doesn't block</span></pre>
+<p><code>Room.scheduleBot()</code> uses this. The result callback runs on the selector thread, so it can safely change the board. If the room closes mid-search, <code>future.cancel(true)</code> interrupts the worker.</p>
+<div class="box warn"><b class="h">A real bug we fixed (good story for the viva)</b>At first the worker called <code>selector.wakeup()</code> at the end of its task. But the Future is only marked "done" <i>after</i> the task returns, so the selector sometimes woke up, saw <code>isDone() == false</code>, and slept another second. Overriding <code>FutureTask.done()</code> fixes the race, because it runs after the result is published.</div>
+<h4>Synchronization</h4>
+<ul>
+  <li><b><code>Leaderboard</code></b>: the selector updates ratings, and a worker writes the file. Every method is <code>synchronized</code>, which prevents the lost-update race from the ticket-booking activity.</li>
+  <li><b><code>Metrics</code></b>: counters use <code>LongAdder</code> (thread-safe, lock-free); logs use <code>synchronized</code> blocks.</li>
+  <li><b>Cross-thread hand-off</b>: <code>Reactor.execute()</code> puts a Runnable on a <code>ConcurrentLinkedQueue</code> and calls <code>wakeup()</code>.</li>
+  <li><b>Thread confinement</b>: game rooms are touched only by the selector thread, so they need no locks at all.</li>
+  <li><b><code>ConsoleClient.send()</code></b> is <code>synchronized</code>: two threads (keyboard and heartbeat) share one output stream and one sequence counter.</li>
+</ul>
+
+<h3>C.3 Your 2-minute demo</h3>
+<ol class="steps">
+  <li>Start a game vs <b>NeonBot · Legend</b> (Ultimate). The turn shows "NeonBot thinking…" for about 1.6 s.</li>
+  <li>In the Control Room, open <b>Threads &amp; AI</b>: each move is listed as "Monte-Carlo Tree Search · 80,000 playouts · 1600 ms · arena-worker-3".</li>
+  <li>While the bot thinks, show that other games (bots, or a second tab) keep playing, so the selector never blocks.</li>
+  <li>Open <code>Reactor.submit()</code> and explain Callable → Future → isDone/get, and the done() bug fix.</li>
+</ol>
+
+<h3>C.4 Likely questions</h3>
+<dl class="qa">
+  <dt>Runnable vs Callable?</dt><dd><code>Runnable.run()</code> returns nothing and can't throw checked exceptions. <code>Callable.call()</code> returns a value and can. The AI returns a move, so it's a Callable.</dd>
+  <dt>Why not just create a new Thread per AI move?</dt><dd>Creating threads is expensive and unlimited threads exhaust resources. A fixed pool reuses 8 threads, and extra jobs wait in the queue.</dd>
+  <dt>What if 20 AI jobs arrive with 8 workers?</dt><dd>8 run and 12 wait in the <code>LinkedBlockingQueue</code>; no new threads are created (the lecture's 5-threads / 20-requests activity).</dd>
+  <dt>Why doesn't Future.get() freeze the server?</dt><dd>We only call it after <code>isDone()</code> is true, so it returns immediately.</dd>
+  <dt>Where is synchronization needed and where not?</dt><dd>Needed for data shared between threads (leaderboard, metrics, queues). Not needed for game rooms, because only one thread touches them.</dd>
+</dl>
+<div class="box tip"><b class="h">Make it yours</b>Add a 4th bot level, "Grandmaster", in <code>AiPlayer.call()</code> with a 3000 ms MCTS budget, plus a button in <code>index.html</code>. Show that it computes more playouts, and that the game stays responsive.</div>
+
+<!-- ======================================================================= MEMBER D -->
+<h2 class="member newpage">Member D — UDP: finding the server on the LAN</h2>
+<p><b>Lecture:</b> UDP in Java Networking. <b>Your files:</b> <code>server/Discovery.java</code>, <code>client/LanScanner.java</code> (also used by <code>ConsoleClient</code> and <code>BotSwarm</code>).</p>
+
+<h3>D.1 The concept in simple words</h3>
+<p>UDP is <b>connectionless</b>: no handshake, no acknowledgements, no retransmission, no ordering. You just send a <b>datagram</b> (header of 8 bytes: source port, destination port, length, checksum) and hope it arrives, "fire and forget". It's ideal for <b>discovery</b>: a client doesn't know the server's IP, so it shouts once to everybody on the network (<b>broadcast</b>), and the server answers. If a datagram is lost, the client simply asks again.</p>
+
+<h3>D.2 How it was built</h3>
+<h4>Server side: a non-blocking DatagramChannel on the main selector (<code>Discovery.onReadable()</code>)</h4>
+<pre>udpChannel.bind(<span class="k">new</span> InetSocketAddress(8888));             <span class="c">// SO_BROADCAST on, non-blocking</span>
+udpChannel.register(selector, SelectionKey.OP_READ);    <span class="c">// same selector as all TCP sockets</span>
+...
+SocketAddress from = ch.receive(buf);                   <span class="c">// null = no datagram waiting (non-blocking)</span>
+<span class="k">if</span> (msg.startsWith(<span class="s">"NEONGRID_DISCOVER"</span>))
+    ch.send(ByteBuffer.wrap(beaconJson), from);         <span class="c">// reply straight to the sender's IP:port</span></pre>
+<p>The <b>beacon</b> is about 250 bytes of JSON: server name, TCP port, LAN IPs, host name, number of players and rooms. Unknown datagrams are ignored, and the buffer is 1500 bytes (one Ethernet MTU).</p>
+<h4>Client side: broadcast with java.net.DatagramSocket (<code>LanScanner.scan()</code>)</h4>
+<ol>
+  <li><code>new DatagramSocket()</code> (random local port) with <code>setBroadcast(true)</code> and <code>setSoTimeout(200)</code>.</li>
+  <li>Build target list: <code>255.255.255.255</code>, each interface's <b>directed broadcast</b> (e.g. <code>192.168.8.255</code> from <code>InterfaceAddress.getBroadcast()</code>) and <code>127.0.0.1</code>.</li>
+  <li>Send the 20-byte query <code>NEONGRID_DISCOVER v1</code> to every target, <b>3 times</b> 400 ms apart (UDP may lose packets).</li>
+  <li><code>receive()</code> beacons for 1.5 s, de-duplicate by host, and measure the round-trip time.</li>
+  <li>The terminal client then opens a normal TCP connection to the IP the beacon came from.</li>
+</ol>
+<pre>  → UDP query 20 bytes to 255.255.255.255:8888
+  → UDP query 20 bytes to 192.168.8.255:8888
+  ← beacon 247 bytes from 192.168.8.163:8888
+  ✔ 192.168.8.163  tcp:8080  "NeonGrid Arena"  players=2 rooms=1  (27 ms)</pre>
+<p>Datagram length = 8-byte UDP header + 20-byte payload = <b>28 bytes</b> for the query (like the lecture's length calculation activity).</p>
+
+<h3>D.3 How it is used in the game</h3>
+<p>Run <code>./scripts/run-client.ps1</code> with no IP and the terminal player finds the server by itself. <code>BotSwarm</code> does the same. The Control Room's <b>UDP · URL · DNS</b> tab lists every query received (sender IP:port and beacon size), and the Overview shows the UDP datagram counters.</p>
+
+<h3>D.4 Your 2-minute demo</h3>
+<ol class="steps">
+  <li>Open the Control Room → UDP · URL · DNS (empty list).</li>
+  <li>Run <code>java -cp build/classes arena.client.LanScanner</code>: the queries and beacon are printed, and the Control Room list fills in.</li>
+  <li>Run <code>./scripts/run-client.ps1</code> with no IP. Type <code>join CODE</code> to join a room a browser friend created and play a move from the terminal.</li>
+  <li>Explain why UDP and not TCP: no connection needed, broadcast reaches everyone, and loss is harmless because we resend.</li>
+</ol>
+
+<h3>D.5 Likely questions</h3>
+<dl class="qa">
+  <dt>Why not use TCP for discovery?</dt><dd>TCP needs a known IP to connect to, which is exactly what we don't have. TCP also cannot broadcast. UDP can send one datagram to every host on the subnet.</dd>
+  <dt>What happens if the query or beacon is lost?</dt><dd>UDP doesn't retransmit, so our application does: the query is sent three times and the client waits for any reply.</dd>
+  <dt>Why does the server reply to <code>from</code>?</dt><dd>UDP is connectionless, so each datagram carries the sender's address. We reply to that IP and port.</dd>
+  <dt>Is UDP secure here?</dt><dd>The beacon is public information only (name, port). All game traffic then goes over the secured TCP channel. Spoofing a beacon would only point a client at a server that still has to pass the DH handshake.</dd>
+  <dt>Why doesn't the browser use UDP discovery?</dt><dd>Browsers are not allowed to open raw UDP sockets. They use the URL or QR code instead, and the Java clients use UDP.</dd>
+</dl>
+<div class="box tip"><b class="h">Make it yours</b>Add the server's uptime (in minutes) to the beacon in <code>Discovery.beacon()</code> and print it in <code>LanScanner.Found.toString()</code>. Or make <code>LanScanner</code> send 5 queries instead of 3 and explain the reliability trade-off.</div>
+
+<!-- ======================================================================= MEMBER E -->
+<h2 class="member newpage">Member E — Secure network programming</h2>
+<p><b>Lecture:</b> Secure Network Programming. <b>Your files:</b> <code>common/Crypto.java</code>, <code>common/SecureLink.java</code>, <code>web/js/net.js</code>, <code>Lobby.onHello()</code> / <code>adminLogin()</code>, <code>Connection.onText()</code> and <code>TokenBucket</code>, the Security lab in <code>control.js</code>.</p>
+
+<h3>E.1 The concept in simple words</h3>
+<p>Players connect over plain <code>http://</code>, often on public Wi-Fi, which is the exact threat from the lecture activity (fake Wi-Fi, eavesdropping, MITM, mark tampering 65 → 85, replayed requests, DoS). We protect the connection in layers:</p>
+<ol>
+  <li><b>Agree a secret key without sending it</b> (Diffie-Hellman).</li>
+  <li><b>Sign every message</b> with that key (HMAC-SHA256), so changes and forgeries are detected.</li>
+  <li><b>Number every message</b>, so old messages can't be replayed.</li>
+  <li><b>Limit the message rate</b> and drop idle sockets (DoS protection).</li>
+  <li><b>Check everything on the server</b>: authentication, authorization and game rules.</li>
+</ol>
+
+<h3>E.2 How it was built</h3>
+<h4>1. Diffie-Hellman key agreement (<code>Crypto.java</code> and <code>net.js</code>)</h4>
+<pre>p = 2048-bit safe prime (RFC 3526 group 14),  g = 2
+browser:  a = random 256-bit,  A = g^a mod p   → sends A in "hello"
+server:   b = random 256-bit,  B = g^b mod p   → sends B in "welcome"   (computed on a worker thread)
+both:     s = B^a mod p = A^b mod p = g^ab mod p     K = SHA-256(hex(s))
+<span class="c">// an eavesdropper sees A and B but cannot compute g^ab (discrete logarithm problem)</span></pre>
+<h4>2. The signed envelope (<code>SecureLink.seal()</code> / <code>open()</code>)</h4>
+<pre>frame = HMAC_SHA256(K, json) as 64 hex chars  +  json
+        3f1c…a9e0{"t":"move","cell":40,"seq":7}
+open(): recompute the HMAC → mismatch?  → <span class="k">TAMPER</span>   (changed in transit, or forged without K)
+        seq ≤ last accepted seq?        → <span class="k">REPLAY</span>   (old message sent again)</pre>
+<p>MACs are compared with <code>MessageDigest.isEqual</code> (constant time), so timing can't leak the MAC. The browser has no <code>crypto.subtle</code> on plain http, so <code>net.js</code> contains our own SHA-256 and HMAC, and uses <code>BigInt</code> for DH.</p>
+<h4>3. Authentication</h4>
+<ul>
+  <li><b>Players:</b> the server gives each session a random 256-bit token, sent encrypted (XOR with <code>SHA-256(K‖"token")</code>). After a refresh or Wi-Fi drop, the browser proves ownership with <code>HMAC(token, newDhPublicKey)</code>. The token itself never travels, and the proof can't be reused.</li>
+  <li><b>Admin (Control Room):</b> <b>challenge-response</b>. Each connection gets a random <code>nonce</code>, and the browser sends <code>HMAC(SHA-256(password), nonce)</code>. The server computes the same value and compares (<code>Lobby.adminLogin()</code>). The password never crosses the network, a captured proof is useless on another connection, and 5 failures close the connection.</li>
+</ul>
+<h4>4. Authorization and server-authoritative rules</h4>
+<p>Admin-only commands (<code>stats</code>, <code>dns</code>, <code>url</code>) return <b>FORBIDDEN</b> without login. In <code>Room.move()</code> the server checks: is there a game, is the sender a player (not a spectator), is it their turn, is the cell legal (<code>Board.whyIllegal()</code>)? A hacked browser can't cheat because the client only sends "I want cell N".</p>
+<h4>5. DoS protection and best practices</h4>
+<ul>
+  <li><b>Token bucket</b> (<code>Connection.TokenBucket</code>): 40-message burst, refilled at 20 per second, checked <i>before</i> any expensive work. Excess messages are dropped (<b>RATE_LIMIT</b>), and 400 violations in 10 s disconnects the client.</li>
+  <li>Frame limit 64 KB, output backlog limit 4 MB, idle and slowloris timeouts (10 s before handshake, 45 s after), connection cap.</li>
+  <li>Input validation (names, chat, JSON depth, DH hex), path-traversal block (<code>/..%2f…</code> → 403), HTML escaping in the UI, security headers, no secrets or stack traces in errors.</li>
+</ul>
+
+<h3>E.3 Map to the lecture threats</h3>
+<table>
+  <tr><th style="width:24%">Threat (lecture)</th><th>Our defence</th><th style="width:26%">Security lab button</th></tr>
+  <tr><td>Eavesdropping</td><td>The session key is never sent (DH); tokens and passwords never sent in clear</td><td>Connect attacker (handshake)</td></tr>
+  <tr><td>MITM / data tampering</td><td>HMAC on every frame</td><td>MITM tamper, Forged frame</td></tr>
+  <tr><td>Replay attack</td><td>Strictly increasing <code>seq</code></td><td>Replay attack</td></tr>
+  <tr><td>DoS</td><td>Token bucket, limits, idle timeouts</td><td>Flood (DoS)</td></tr>
+  <tr><td>Spoofing / unauthorized access</td><td>Admin challenge-response, FORBIDDEN checks</td><td>Wrong password, Privilege escalation</td></tr>
+  <tr><td>Cheating / invalid input</td><td>Server-authoritative validation, path checks</td><td>Cheat move, Path traversal</td></tr>
+</table>
+
+<h3>E.4 Your 2-minute demo</h3>
+<ol class="steps">
+  <li>Open the Control Room. Explain that the password is checked by challenge-response, then type a wrong password once ("4 attempts left") and then the right one.</li>
+  <li>Security lab → <b>Connect attacker</b> and walk through the 5 handshake steps.</li>
+  <li>Click Replay, MITM tamper, Forged frame, Cheat move, Privilege escalation, Wrong password, Path traversal and Flood. Each green line is the server blocking it.</li>
+  <li>Packet capture → tick "only rejected frames" and show REPLAY / TAMPER / RATE_LIMIT rows with their seq and MAC.</li>
+  <li>Bonus: in a game, turn Wi-Fi off and on and show that the session resumes on a fresh key.</li>
+</ol>
+
+<h3>E.5 Likely questions</h3>
+<dl class="qa">
+  <dt>Is the data encrypted?</dt><dd>No. Messages are <b>signed, not encrypted</b>: we provide integrity, authenticity and replay protection, not confidentiality. In production we would run the same protocol inside TLS (<code>wss://</code>) with a CA certificate. Being honest about this earns marks.</dd>
+  <dt>Can a MITM break Diffie-Hellman?</dt><dd>A <i>passive</i> eavesdropper cannot. An <i>active</i> attacker who intercepts both sides could run two separate handshakes. Certificates (TLS) solve that by authenticating the server.</dd>
+  <dt>Why HMAC and not plain SHA-256?</dt><dd>Anyone can recompute a plain hash after changing the data. HMAC needs the secret key, so only the two real parties can produce a valid MAC.</dd>
+  <dt>Why does seq stop replays?</dt><dd>The server remembers the last accepted seq. A copied old frame has a smaller or equal seq and is rejected, even though its MAC is valid.</dd>
+  <dt>Why not send the admin password directly?</dt><dd>It would be visible to anyone sniffing the Wi-Fi. With challenge-response the server proves you know it without it ever being transmitted.</dd>
+</dl>
+<div class="box tip"><b class="h">Make it yours</b>Change the rate limit in <code>Connection.java</code> (<code>new TokenBucket(40, 20)</code>) to <code>(10, 5)</code>, rebuild, and show that the flood now drops more messages. Or change the admin lock-out from 5 to 3 attempts in <code>Lobby.adminLogin()</code>.</div>
+
+<!-- ======================================================================= PART C -->
+<h2 class="newpage">Part C — Practical checklist for the team</h2>
+<h3>Run commands (from <code>D:\NeonGrid-Arena\NeonGridArena</code> in PowerShell)</h3>
+<pre>Set-ExecutionPolicy -Scope Process Bypass     <span class="c"># once per window</span>
+./scripts/build.ps1                                    <span class="c"># after any Java change</span>
+./scripts/run-server.ps1                               <span class="c"># keep this window open</span>
+./scripts/run-server.ps1 --admin-pass MySecret         <span class="c"># optional: own password</span>
+./scripts/run-client.ps1                               <span class="c"># terminal player (UDP discovery)</span>
+./scripts/run-bots.ps1 --bots 300                      <span class="c"># load test</span>
+java -cp build/classes arena.client.LanScanner           <span class="c"># UDP scan only</span></pre>
+<p>Game: <code>http://localhost:8080/</code> · Phone: the LAN address printed by the server · Control Room: antenna icon, or <code>/control</code>, password <code>arena-admin</code>. Web files (HTML/CSS/JS) change instantly after a browser refresh; Java changes need <code>./scripts/build.ps1</code> and a server restart.</p>
+<h3>Demo-day setup</h3>
+<ul>
+  <li>One laptop runs the server. Allow Java through Windows Firewall on <b>Private networks</b>.</li>
+  <li>Bring a phone hotspot in case campus Wi-Fi blocks devices from reaching each other.</li>
+  <li>Screen 1: the game. Screen 2 (or second tab): the Control Room, logged in.</li>
+  <li>Order: A (NIO + bots) → B (packets, invite/QR, URL/DNS) → C (bot + Threads tab) → D (UDP terminal client) → E (security lab). Each 2 minutes.</li>
+  <li>Stop the 300 bots (Ctrl+C) before member C's part so the Threads tab is easy to read.</li>
+</ul>
+<h3>How to study your part (about 2–3 evenings)</h3>
+<ol>
+  <li>Read your chapter here, then open your files. Every class starts with a comment explaining its job.</li>
+  <li>Follow "the life of one move" (A4) through your code with the server running.</li>
+  <li>Do your "Make it yours" change, rebuild, and show it working.</li>
+  <li>Practise your 2-minute demo out loud and answer the Q&amp;A without notes.</li>
+  <li>Be ready to answer one question about a teammate's part: the evaluator may ask anyone.</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#060714">
+  <title>NeonGrid — Ultimate Tic-Tac-Toe</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/game.css">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<!-- shared gradients for every X / O piece -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gx" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f9a8d4"/><stop offset="1" stop-color="#a855f7"/></linearGradient>
+  </defs>
+</svg>
+
+<header class="bar" id="bar">
+  <button class="brand" id="brand" aria-label="Home">
+    <span class="brand-mark"><i class="bx"></i><i class="bo"></i></span>
+    <span class="brand-name">NEON<b>GRID</b></span>
+  </button>
+  <div class="bar-right">
+    <a class="icon-btn ctl-link" href="/control" target="_blank" rel="noopener" title="Network Control Room (admin)" aria-label="Network Control Room">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/><circle cx="12" cy="12" r="2"/></svg>
+      <span class="ctl-tip">Control Room</span>
+    </a>
+    <button class="icon-btn" id="btn-how-top" title="How to play">?</button>
+    <button class="icon-btn" id="btn-sound" title="Sound">🔊</button>
+    <div class="me" id="me" hidden>
+      <span class="me-av" id="me-av">?</span>
+      <span class="me-txt"><b id="me-name">Player</b><small id="me-elo">1200</small></span>
+      <span class="net-dot" id="net-dot" title="Connected"></span>
+    </div>
+  </div>
+</header>
+
+<!-- ================================================================ SPLASH -->
+<section class="view on" id="v-splash">
+  <div class="splash">
+    <div class="hero-board" aria-hidden="true">
+      <div class="hb-grid" id="hero-grid"></div>
+    </div>
+    <h1 class="title"><span class="t1">NEON</span><span class="t2">GRID</span></h1>
+    <p class="tagline">Ultimate Tic-Tac-Toe · Live Multiplayer</p>
+    <form class="name-form" id="f-name" autocomplete="off">
+      <input id="in-name" maxlength="16" placeholder="Your player name" aria-label="Player name" required>
+      <button class="btn-play" id="btn-play" type="submit"><span>PLAY</span></button>
+    </form>
+    <p class="invite-note" id="invite-note"></p>
+    <ul class="perks">
+      <li><span>⚔️</span>Battle friends on any device</li>
+      <li><span>🤖</span>Outsmart NeonBot</li>
+      <li><span>🏆</span>Climb the Hall of Fame</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ HOME -->
+<section class="view" id="v-home">
+  <div class="home">
+    <div class="home-main">
+      <div class="hello">
+        <div>
+          <p class="eyebrow" id="online-line">Players online</p>
+          <h2>Ready, <span id="h-name">Player</span>?</h2>
+        </div>
+        <button class="ghost-btn" id="btn-how">How to play</button>
+      </div>
+
+      <div class="modes" id="modes">
+        <button class="mode on" data-mode="ultimate">
+          <span class="mode-art ult"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="mode-txt"><b>Ultimate</b><small>9 boards · one champion</small></span>
+          <span class="mode-check">✓</span>
+        </button>
+        <button class="mode" data-mode="classic">
+          <span class="mode-art cls"><i class="x"></i><i></i><i class="o"></i><i></i><i class="x"></i><i></i><i class="o"></i><i></i><i class="x"></i></span>
+          <span class="mode-txt"><b>Classic</b><small>The quick 3×3 duel</small></span>
+          <span class="mode-check">✓</span>
+        </button>
+      </div>
+
+      <div class="play-grid">
+        <button class="play-card quick" id="a-quick">
+          <span class="pc-ico">⚡</span>
+          <span class="pc-txt"><b>Quick Match</b><small>Get paired with the next player</small></span>
+          <span class="pc-go">PLAY</span>
+        </button>
+        <div class="play-card bot">
+          <span class="pc-ico">🤖</span>
+          <span class="pc-txt"><b>vs NeonBot</b><small>Pick your challenge</small></span>
+          <div class="levels">
+            <button data-ai="easy"><i>●</i>Rookie</button>
+            <button data-ai="medium"><i>●●</i>Pro</button>
+            <button data-ai="hard"><i>●●●</i>Legend</button>
+          </div>
+        </div>
+        <div class="play-card friend">
+          <span class="pc-ico">👥</span>
+          <span class="pc-txt"><b>Play a Friend</b><small>Private room with a code</small></span>
+          <div class="friend-row">
+            <button class="mini-btn" id="a-create">Create room</button>
+            <form id="f-join" autocomplete="off"><input id="in-code" maxlength="4" placeholder="CODE" aria-label="Room code"><button class="mini-btn go" type="submit">Join</button></form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="home-side">
+      <div class="panel">
+        <h3>🏆 Hall of Fame</h3>
+        <ol class="lb" id="lb"></ol>
+      </div>
+      <div class="panel">
+        <h3><span class="live-dot"></span> Live now</h3>
+        <div class="live" id="live"></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================================================================ GAME -->
+<section class="view" id="v-game">
+  <div class="arena">
+    <div class="versus">
+      <div class="pcard x" id="p1">
+        <div class="ring"><div class="av">X</div></div>
+        <div class="pinfo"><b class="pname">—</b><small class="psub"></small></div>
+        <span class="psym">X</span>
+      </div>
+      <div class="turn" id="turn">
+        <div class="turn-main" id="turn-main">—</div>
+        <div class="turn-sub" id="turn-sub"></div>
+      </div>
+      <div class="pcard o" id="p2">
+        <span class="psym">O</span>
+        <div class="pinfo right"><b class="pname">—</b><small class="psub"></small></div>
+        <div class="ring"><div class="av">O</div></div>
+      </div>
+    </div>
+
+    <div class="board-wrap" id="board-wrap">
+      <div class="board" id="board"></div>
+      <svg class="win-line" id="win-line" viewBox="0 0 300 300" preserveAspectRatio="none"></svg>
+      <div class="waiting" id="waiting">
+        <p class="eyebrow">Your private room</p>
+        <div class="code-tiles" id="code-tiles"></div>
+        <p class="w-text">Send this to your friend, or let them scan the code.</p>
+        <div class="share">
+          <div class="qr" id="qr"></div>
+          <div class="share-right">
+            <div class="link-box"><input id="invite-link" readonly aria-label="Invite link"><button id="btn-copy">Copy</button></div>
+            <button class="mini-btn" id="btn-share" hidden>Share…</button>
+            <p class="w-wait"><span class="dots"><i></i><i></i><i></i></span> Waiting for your friend</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint"></div>
+
+    <div class="dock">
+      <button class="dock-btn" id="btn-leave" title="Leave the game">✕ <span>Leave</span></button>
+      <div class="reacts" id="reacts"></div>
+      <button class="dock-btn" id="btn-chat" title="Chat">💬 <span>Chat</span><em class="badge" id="chat-badge" hidden>0</em></button>
+    </div>
+  </div>
+
+  <aside class="chat" id="chat" aria-label="Chat">
+    <header><b>Chat</b><button class="icon-btn" id="chat-close" aria-label="Close chat">✕</button></header>
+    <div class="chat-log" id="chat-log"></div>
+    <form class="chat-form" id="f-chat" autocomplete="off"><input id="in-chat" maxlength="200" placeholder="Say something nice…"><button type="submit">➤</button></form>
+  </aside>
+</section>
+
+<!-- ================================================================ OVERLAYS -->
+<div class="overlay" id="ov-search">
+  <div class="sheet center">
+    <div class="radar"><span class="me-blip" id="search-av">?</span></div>
+    <h2>Finding an opponent</h2>
+    <p class="muted">Hang tight — you'll be matched with the next player who joins.</p>
+    <div class="sheet-actions">
+      <button class="mini-btn" id="search-bot">🤖 Play NeonBot instead</button>
+      <button class="mini-btn ghost" id="search-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov-result">
+  <div class="sheet center result">
+    <div class="r-emblem" id="r-emblem">🏆</div>
+    <h2 class="r-title" id="r-title">VICTORY</h2>
+    <p class="r-sub" id="r-sub"></p>
+    <div class="r-elo" id="r-elo"></div>
+    <div class="sheet-actions">
+      <button class="btn-play small" id="r-again"><span>PLAY AGAIN</span></button>
+      <button class="mini-btn ghost" id="r-view">View board</button>
+      <button class="mini-btn ghost" id="r-home">Home</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov-how">
+  <div class="sheet how">
+    <button class="icon-btn close" id="how-close" aria-label="Close">✕</button>
+    <div class="how-track" id="how-track">
+      <div class="how-slide">
+        <div class="tut tut1"><div class="tm"><i class="x"></i><i class="x"></i><i class="x"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i></div><span class="arrow">→</span><div class="tm won-x"><b>X</b></div></div>
+        <h3>1 · Win small boards</h3>
+        <p>The big board is made of 9 small boards. Get three in a row inside a small board to claim it.</p>
+      </div>
+      <div class="how-slide">
+        <div class="tut tut2"><div class="tbig">
+          <div class="tb"><i></i><i></i><i class="x pulse"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="tb"></div><div class="tb glow"></div>
+          <div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div></div></div>
+        <h3>2 · Your move sends your opponent</h3>
+        <p>Play in the <b>top-right cell</b> of any board and your opponent must play in the <b>top-right board</b>. The board you must use always glows.</p>
+      </div>
+      <div class="how-slide">
+        <div class="tut tut3"><div class="tbig wins"><div class="tb wx">X</div><div class="tb"></div><div class="tb wo">O</div><div class="tb"></div><div class="tb wx">X</div><div class="tb"></div><div class="tb wo">O</div><div class="tb"></div><div class="tb wx">X</div></div></div>
+        <h3>3 · Win three boards in a row</h3>
+        <p>Claim three small boards in a line to win. Sent to a board that's already finished? Then you get a <b>free move</b> anywhere!</p>
+      </div>
+    </div>
+    <div class="how-nav"><div class="how-dots" id="how-dots"><i class="on"></i><i></i><i></i></div><button class="btn-play small" id="how-next"><span>NEXT</span></button></div>
+  </div>
+</div>
+
+<div class="overlay" id="ov-reconnect">
+  <div class="sheet center">
+    <div class="radar amber"></div>
+    <h2>Connection lost</h2>
+    <p class="muted" id="reconnect-note">Reconnecting… your seat is saved for 30 seconds.</p>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+<script src="/js/net.js"></script>
+<script src="/js/game.js"></script>
+</body>
+</html>
