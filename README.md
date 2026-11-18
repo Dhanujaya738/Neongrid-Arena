@@ -1,8 +1,8 @@
-# NeonGrid Arena
+﻿# NeonGrid Arena
 
 **Real-time multiplayer Ultimate Tic-Tac-Toe, built on a Java NIO server written from scratch.**
 
-Network Programming · Assignment 02. One `Selector` thread serves HTTP, WebSocket, a binary TCP protocol and UDP discovery at the same time, and every message is signed with a key agreed by Diffie-Hellman. Plain JDK only: no frameworks, no libraries.
+Network Programming Â· Assignment 02. One `Selector` thread serves HTTP, WebSocket, a binary TCP protocol and UDP discovery at the same time, and every message is signed with a key agreed by Diffie-Hellman. Plain JDK only: no frameworks, no libraries.
 
 ![Game](docs/report/img/03-game.jpg)
 
@@ -11,7 +11,7 @@ Network Programming · Assignment 02. One `Selector` thread serves HTTP, WebSock
 ## Features
 
 **For players** (`http://<server>:8080/`)
-- Ultimate 9×9 and Classic 3×3 Tic-Tac-Toe
+- Ultimate 9Ã—9 and Classic 3Ã—3 Tic-Tac-Toe
 - Quick Match (server matchmaking), private friend rooms with a code, invite link and **QR code**, spectating
 - **NeonBot** AI opponent at three levels (Rookie / Pro / Legend)
 - Glowing "where you can play" boards, a move preview, and an animated how-to-play guide
@@ -21,7 +21,7 @@ Network Programming · Assignment 02. One `Selector` thread serves HTTP, WebSock
 **For evaluators / admins** (`http://<server>:8080/control`, password protected)
 - Live dashboard: open sockets vs threads, throughput, selector loops, worker pool
 - Server-side packet capture (every frame with its sequence number and HMAC)
-- Security lab: 9 real attacks (replay, tamper, forgery, flood, cheat, …), all blocked by the server
+- Security lab: 9 real attacks (replay, tamper, forgery, flood, cheat, â€¦), all blocked by the server
 - Connections, rooms, AI telemetry, UDP / URL / DNS tools
 
 | Home | Friend room (phone) | Control Room |
@@ -71,23 +71,23 @@ Full step-by-step instructions and troubleshooting: **[docs/SETUP.md](docs/SETUP
 
 ```
 NeonGridArena/
-├── src/arena/                 Java source code (server, game, clients)
-│   ├── server/                NIO server: Reactor, Connection, Http, WebSocket, Discovery (UDP),
-│   │                          Lobby, Room, Session, Leaderboard, Metrics, NetUtil, ArenaServer (main)
-│   ├── game/                  Board (game rules) and AiPlayer (NeonBot AI)
-│   ├── common/                Crypto (Diffie-Hellman, SHA-256, HMAC), SecureLink, Json
-│   └── client/                ConsoleClient, BotSwarm (load test), LanScanner (UDP), Handshake
-├── web/                       Browser front-end, served by the Java server
-│   ├── index.html             the game
-│   ├── control.html           the Network Control Room
-│   ├── css/                   game.css (game) · style.css (Control Room)
-│   └── js/                    game.js · control.js · net.js (secure WebSocket shared by both)
-├── scripts/                   build.ps1 / build.sh · run-server · run-client · run-bots · package
-├── docs/
-│   ├── SETUP.md               setup guide for teammates
-│   └── report/                project report and team guide (HTML sources, PDFs, screenshots)
-├── .gitignore
-└── README.md
+â”œâ”€â”€ src/arena/                 Java source code (server, game, clients)
+â”‚   â”œâ”€â”€ server/                NIO server: Reactor, Connection, Http, WebSocket, Discovery (UDP),
+â”‚   â”‚                          Lobby, SecureHandshake, AdminConsole, Room, Session, Leaderboard, Metrics, NetUtil, ArenaServer (main)
+â”‚   â”œâ”€â”€ game/                  Board (game rules) and AiPlayer (NeonBot AI)
+â”‚   â”œâ”€â”€ common/                Crypto (Diffie-Hellman, SHA-256, HMAC), SecureLink, Json
+â”‚   â””â”€â”€ client/                ConsoleClient, BotSwarm (load test), LanScanner (UDP), Handshake
+â”œâ”€â”€ web/                       Browser front-end, served by the Java server
+â”‚   â”œâ”€â”€ index.html             the game
+â”‚   â”œâ”€â”€ control.html           the Network Control Room
+â”‚   â”œâ”€â”€ css/                   game.css (game) Â· control.css (Control Room)
+â”‚   â””â”€â”€ js/                    game.js Â· control.js Â· net.js (secure WebSocket shared by both)
+â”œâ”€â”€ scripts/                   build.ps1 / build.sh Â· run-server Â· run-client Â· run-bots Â· package
+â”œâ”€â”€ docs/
+â”‚   â”œâ”€â”€ SETUP.md               setup guide for teammates
+â”‚   â””â”€â”€ report/                project report and team guide (HTML sources, PDFs, screenshots)
+â”œâ”€â”€ .gitignore
+â””â”€â”€ README.md
 ```
 
 `build/` (compiled classes and the jar) and `data/` (the saved leaderboard) are created at runtime and are not committed.
